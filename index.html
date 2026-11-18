@@ -35,6 +35,30 @@
             padding: 0;
             color: var(--text-main);
             overflow-x: hidden;
+            background-color: #0f172a;
+        }
+
+        /* Pantalla de carga anti-pantalla blanca */
+        #pantallaCarga {
+            position: fixed;
+            inset: 0;
+            background-color: #0f172a;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #ffffff;
+            transition: opacity 0.5s ease;
+        }
+        .spinner-carga {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #ea580c;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
         }
 
         .bg-layer {
@@ -56,6 +80,8 @@
             background: transparent;
             position: relative;
             z-index: 1;
+            opacity: 0; /* Se hace visible con JS */
+            transition: opacity 0.5s ease;
         }
 
         @media (min-width: 1024px) {
@@ -136,10 +162,6 @@
             gap: 0.3rem;
         }
 
-        .btn-secondary-header:active {
-            background-color: rgba(255, 255, 255, 0.28);
-        }
-
         .btn-add-person {
             background-color: var(--primary);
             color: #ffffff;
@@ -153,10 +175,6 @@
             align-items: center;
             gap: 0.3rem;
             box-shadow: 0 4px 12px rgba(234, 88, 12, 0.45);
-        }
-
-        .btn-add-person:active {
-            transform: scale(0.97);
         }
 
         .salones-tabs {
@@ -254,10 +272,6 @@
             flex-shrink: 0;
         }
 
-        .btn-ofrenda-salon:active {
-            transform: scale(0.97);
-        }
-
         .search-box {
             position: relative;
         }
@@ -277,12 +291,6 @@
         .search-box input::placeholder {
             color: rgba(255, 255, 255, 0.8);
             font-weight: 500;
-        }
-
-        .search-box input:focus {
-            outline: none;
-            border-color: #ffffff;
-            background-color: rgba(15, 23, 42, 0.75);
         }
 
         .search-icon {
@@ -355,11 +363,261 @@
             gap: 0.6rem;
         }
 
-        .person-card:active {
-            transform: scale(0.985);
-            background-color: rgba(15, 23, 42, 0.74);
-        }
-
         .person-card.registered {
             border-color: #34d399;
             background: rgba(6, 95, 70, 0.7);
+        }
+
+        .person-info {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .person-info h3 {
+            margin: 0 0 0.28rem;
+            font-size: 1.12rem;
+            color: #ffffff;
+            font-weight: 800;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+        }
+
+        .person-info p {
+            margin: 0;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #e2e8f0;
+            line-height: 1.35;
+        }
+
+        .obs-pill {
+            display: inline-block;
+            margin-top: 0.3rem;
+            padding: 0.18rem 0.55rem;
+            background: rgba(254, 243, 199, 0.22);
+            border: 1px solid rgba(254, 243, 199, 0.5);
+            color: #fef3c7;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .badge {
+            padding: 0.55rem 0.9rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .badge.pending {
+            background-color: rgba(255, 255, 255, 0.25);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .badge.done {
+            background-color: var(--success);
+            color: #ffffff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2.2rem 1rem;
+            color: #ffffff;
+            background: rgba(15, 23, 42, 0.58);
+            border: 1.5px solid var(--border-glass);
+            border-radius: 16px;
+            backdrop-filter: blur(8px);
+        }
+
+        .empty-state button {
+            margin-top: 0.85rem;
+            background-color: var(--primary);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.85rem 1.3rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* Modales */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.75);
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 50;
+            backdrop-filter: blur(4px);
+        }
+        .modal-backdrop.open { display: flex; }
+
+        .modal-sheet {
+            background: #ffffff;
+            color: var(--text-dark);
+            width: 100%;
+            max-width: 600px;
+            border-radius: 24px 24px 0 0;
+            padding: 1.4rem 1.2rem 1.8rem;
+            max-height: 92vh;
+            overflow-y: auto;
+            animation: slideUp 0.2s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(40px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .modal-header h2 { margin: 0; font-size: 1.25rem; font-weight: 800; }
+        .modal-header span { font-size: 0.85rem; color: var(--primary-hover); font-weight: 750; margin-bottom: 0.15rem; display:block; }
+        .btn-close { background: #f1f5f9; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; flex-shrink: 0; }
+
+        .form-group { margin-bottom: 1.1rem; }
+        .form-group label.section-label { display: block; margin-bottom: 0.45rem; font-weight: 700; font-size: 0.94rem; }
+        .form-control { width: 100%; padding: 0.9rem 0.95rem; border: 1.5px solid #cbd5e1; border-radius: 12px; font-size: 1rem; background-color: #f8fafc; color: var(--text-dark); }
+        .form-control:focus { outline: none; border-color: var(--primary); background-color: #ffffff; }
+
+        .quick-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.55rem; }
+        .tag-chip { background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; border-radius: 999px; padding: 0.35rem 0.7rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+        .tag-chip:active { background: var(--primary-light); border-color: var(--primary); color: var(--primary-hover); }
+
+        .radio-group { display: grid; gap: 0.5rem; }
+        .cols-3 { grid-template-columns: repeat(3, 1fr); }
+        .cols-2 { grid-template-columns: repeat(2, 1fr); }
+        .radio-option input { display: none; }
+        .radio-option label { display: flex; justify-content: center; align-items: center; padding: 0.9rem 0.4rem; border: 1.5px solid #cbd5e1; border-radius: 12px; background: #f8fafc; font-weight: 600; font-size: 0.95rem; cursor: pointer; text-align: center; }
+        .radio-option input:checked + label { background-color: var(--primary-light); border-color: var(--primary); color: var(--primary-hover); font-weight: 800; }
+
+        .btn-primary { width: 100%; background-color: var(--primary); color: white; border: none; border-radius: 14px; padding: 1rem; font-size: 1.05rem; font-weight: 700; cursor: pointer; margin-top: 0.4rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem; min-height: 52px; }
+        .btn-primary:disabled { background-color: #94a3b8; cursor: not-allowed; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { display: none; width: 20px; height: 20px; border: 3px solid rgba(255, 255, 255, 0.35); border-top-color: #ffffff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+
+        .salon-manage-list { display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 1.25rem; }
+        .salon-manage-card { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 0.85rem; display: flex; flex-direction: column; gap: 0.55rem; }
+        .salon-manage-row { display: flex; gap: 0.5rem; align-items: center; }
+        .salon-manage-card input { flex: 1; padding: 0.7rem 0.8rem; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.92rem; }
+        .btn-icon-save { background-color: var(--success-bg); color: var(--success-text); border: none; border-radius: 10px; padding: 0.7rem 0.9rem; font-weight: 800; cursor: pointer; }
+        .btn-icon-delete { background-color: var(--error-bg); color: var(--error-text); border: none; border-radius: 10px; padding: 0.7rem 0.8rem; font-weight: 800; cursor: pointer; }
+
+        .add-salon-box { display: flex; flex-direction: column; gap: 0.55rem; padding-top: 1rem; border-top: 1px solid #e2e8f0; }
+        .add-salon-box input { width: 100%; padding: 0.8rem 0.9rem; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.95rem; }
+
+        .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(100px); background: #1e293b; color: white; padding: 0.9rem 1.25rem; border-radius: 12px; font-size: 0.92rem; font-weight: 600; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45); transition: transform 0.25s ease; z-index: 100; text-align: center; width: 90%; max-width: 420px; }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.success { background: #065f46; }
+        .toast.error { background: #991b1b; }
+    </style>
+</head>
+<body>
+
+<!-- Pantalla de carga para evitar fondo blanco -->
+<div id="pantallaCarga">
+    <div class="spinner-carga"></div>
+    <h2 style="margin:0; font-size: 1.2rem;">Cargando sistema...</h2>
+    <p style="color:#94a3b8; font-size:0.9rem; margin-top:0.5rem;">Preparando base de datos</p>
+    <button id="btnResetEmergencia" style="display:none; margin-top:2rem; padding: 10px 20px; background: #ef4444; color:white; border:none; border-radius: 8px; font-weight:bold; cursor:pointer;" onclick="forzarReinicio()">Restaurar Aplicación</button>
+</div>
+
+<div class="bg-layer"></div>
+
+<div class="app-container" id="appContainer">
+    <div class="church-header-banner">
+        Iglesia Bautista Gracia sobre Gracia • Callao
+    </div>
+
+    <div class="top-bar">
+        <div class="title-row">
+            <div>
+                <h1>Control de Asistencia</h1>
+                <span class="date-subtitle" id="currentDateLabel">Cargando fecha...</span>
+            </div>
+            <div class="header-actions">
+                <button type="button" class="btn-secondary-header" onclick="abrirModalSalones()">
+                    ⚙️ Salones
+                </button>
+                <button type="button" class="btn-add-person" onclick="abrirModalNuevaPersona()">
+                    + Persona
+                </button>
+            </div>
+        </div>
+
+        <div class="salones-tabs" id="salonesTabs"></div>
+
+        <div class="salon-info-bar">
+            <div class="encargado-box">
+                <span class="encargado-text">
+                    👤 Encargado: <strong id="encargadoSalonTexto">Por asignar</strong>
+                </span>
+                <button type="button" class="btn-edit-encargado" title="Cambiar encargado" onclick="editarEncargadoRapido()">
+                    ✏️
+                </button>
+            </div>
+            <button type="button" class="btn-ofrenda-salon" onclick="abrirModalOfrendaSalon()">
+                💰 Ofrenda: <span id="ofrendaSalonTexto">S/ 0.00</span>
+            </button>
+        </div>
+
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="Buscar nombre..." oninput="filtrarPersonas()">
+            <button type="button" class="clear-search" id="clearSearchBtn" onclick="limpiarBusqueda()">✕</button>
+        </div>
+    </div>
+
+    <div class="stats-bar">
+        <span>Salón: <strong id="salonActualTexto">Salón 1</strong></span>
+        <span>Asistencia hoy: <strong id="contadorRegistrados">0 / 0</strong></span>
+    </div>
+
+    <div class="person-list" id="personList"></div>
+</div>
+
+<!-- MODAL 1: Registrar Asistencia Individual -->
+<div class="modal-backdrop" id="modalAsistencia" onclick="cerrarModalFondo(event, 'modalAsistencia')">
+    <div class="modal-sheet">
+        <div class="modal-header">
+            <div>
+                <span id="modalSalonTag">Salón 1</span>
+                <h2 id="modalNombrePersona">Nombre de Persona</h2>
+            </div>
+            <button type="button" class="btn-close" onclick="cerrarModal('modalAsistencia')">✕</button>
+        </div>
+
+        <form id="formAsistencia" onsubmit="guardarAsistencia(event)">
+            <div class="form-group">
+                <label class="section-label">Asistencia</label>
+                <div class="radio-group cols-3">
+                    <div class="radio-option">
+                        <input type="radio" name="asistencia" id="a_presente" value="Presente" checked onchange="sincronizarPuntualidad('Presente')">
+                        <label for="a_presente">Presente</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="asistencia" id="a_tardanza" value="Tardanza" onchange="sincronizarPuntualidad('Tardanza')">
+                        <label for="a_tardanza">Tardanza</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="asistencia" id="a_ausente" value="Ausente">
+                        <label for="a_ausente">Ausente</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="section-label">Puntualidad</label>
+                <div class="radio-group cols-2">
+                    <div class="radio-
