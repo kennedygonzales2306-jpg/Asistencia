@@ -37,7 +37,6 @@
             overflow-x: hidden;
         }
 
-        /* Imagen de fondo fija a pantalla completa */
         .bg-layer {
             position: fixed;
             inset: 0;
@@ -49,7 +48,6 @@
             background-repeat: no-repeat;
         }
 
-        /* Contenedor 100% ancho en celulares */
         .app-container {
             width: 100%;
             min-height: 100vh;
@@ -69,7 +67,6 @@
             }
         }
 
-        /* Cintillo superior institucional */
         .church-header-banner {
             background-color: rgba(234, 88, 12, 0.95);
             color: #ffffff;
@@ -83,7 +80,6 @@
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
         }
 
-        /* Cabecera fija con efecto cristal */
         .top-bar {
             background-color: rgba(15, 23, 42, 0.48);
             padding: 0.95rem 1rem 0.85rem;
@@ -163,7 +159,6 @@
             transform: scale(0.97);
         }
 
-        /* Pestañas horizontales de Salones */
         .salones-tabs {
             display: flex;
             gap: 0.5rem;
@@ -197,7 +192,6 @@
             box-shadow: 0 4px 12px rgba(234, 88, 12, 0.35);
         }
 
-        /* Tarjeta informativa del Salón: Encargado + Ofrenda General */
         .salon-info-bar {
             display: flex;
             justify-content: space-between;
@@ -264,7 +258,6 @@
             transform: scale(0.97);
         }
 
-        /* Buscador instantáneo */
         .search-box {
             position: relative;
         }
@@ -319,7 +312,6 @@
             justify-content: center;
         }
 
-        /* Barra de progreso del salón */
         .stats-bar {
             display: flex;
             justify-content: space-between;
@@ -339,7 +331,6 @@
             color: #ffffff;
         }
 
-        /* Lista de asistentes */
         .person-list {
             flex: 1;
             padding: 0.9rem 1rem 2.5rem;
@@ -448,7 +439,6 @@
             cursor: pointer;
         }
 
-        /* Modales táctiles inferiores */
         .modal-backdrop {
             position: fixed;
             inset: 0;
@@ -545,7 +535,6 @@
             background-color: #ffffff;
         }
 
-        /* Etiquetas rápidas para Observaciones */
         .quick-tags {
             display: flex;
             flex-wrap: wrap;
@@ -638,7 +627,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Gestor de Salones y Encargados */
         .salon-manage-list {
             display: flex;
             flex-direction: column;
@@ -752,7 +740,7 @@
         <div class="title-row">
             <div>
                 <h1>Control de Asistencia</h1>
-                <span class="date-subtitle" id="currentDateLabel">Cargando fecha...</span>
+                <span class="date-subtitle" id="currentDateLabel">Martes, 17 de noviembre de 2026</span>
             </div>
             <div class="header-actions">
                 <button type="button" class="btn-secondary-header" onclick="abrirModalSalones()">
@@ -764,14 +752,19 @@
             </div>
         </div>
 
-        <!-- Pestañas deslizables por salón -->
-        <div class="salones-tabs" id="salonesTabs"></div>
+        <!-- Botones de salones pre-cargados en HTML para visualización inmediata -->
+        <div class="salones-tabs" id="salonesTabs">
+            <button type="button" class="salon-tab active" onclick="seleccionarSalon('sal_1')">Salón 1</button>
+            <button type="button" class="salon-tab" onclick="seleccionarSalon('sal_2')">Salón 2</button>
+            <button type="button" class="salon-tab" onclick="seleccionarSalon('sal_3')">Salón 3</button>
+            <button type="button" class="salon-tab" onclick="seleccionarSalon('sal_4')">Salón 4</button>
+            <button type="button" class="salon-tab" onclick="seleccionarSalon('sal_5')">Salón 5</button>
+        </div>
 
-        <!-- Barra de Encargado del Salón y Ofrenda General del Salón -->
         <div class="salon-info-bar">
             <div class="encargado-box">
                 <span class="encargado-text">
-                    👤 Encargado: <strong id="encargadoSalonTexto">Sin asignar</strong>
+                    👤 Encargado: <strong id="encargadoSalonTexto">Por asignar</strong>
                 </span>
                 <button type="button" class="btn-edit-encargado" title="Cambiar encargado" onclick="editarEncargadoRapido()">
                     ✏️
@@ -782,23 +775,22 @@
             </button>
         </div>
 
-        <!-- Buscador instantáneo -->
         <div class="search-box">
             <span class="search-icon">🔍</span>
-            <input type="text" id="searchInput" placeholder="Buscar nombre..." oninput="filtrarPersonas()">
+            <input type="text" id="searchInput" placeholder="Buscar nombre en Salón 1..." oninput="filtrarPersonas()">
             <button type="button" class="clear-search" id="clearSearchBtn" onclick="limpiarBusqueda()">✕</button>
         </div>
     </div>
 
     <div class="stats-bar">
         <span>Salón: <strong id="salonActualTexto">Salón 1</strong></span>
-        <span>Asistencia hoy: <strong id="contadorRegistrados">0 / 0</strong></span>
+        <span>Asistencia hoy: <strong id="contadorRegistrados">0 / 3</strong></span>
     </div>
 
     <div class="person-list" id="personList"></div>
 </div>
 
-<!-- MODAL 1: Registrar Asistencia Individual (Con Observaciones, sin Ofrenda individual) -->
+<!-- MODAL 1: Registrar Asistencia Individual -->
 <div class="modal-backdrop" id="modalAsistencia" onclick="cerrarModalFondo(event, 'modalAsistencia')">
     <div class="modal-sheet">
         <div class="modal-header">
@@ -814,11 +806,11 @@
                 <label class="section-label">Asistencia</label>
                 <div class="radio-group cols-3">
                     <div class="radio-option">
-                        <input type="radio" name="asistencia" id="a_presente" value="Presente" checked>
+                        <input type="radio" name="asistencia" id="a_presente" value="Presente" checked onchange="sincronizarPuntualidad('Presente')">
                         <label for="a_presente">Presente</label>
                     </div>
                     <div class="radio-option">
-                        <input type="radio" name="asistencia" id="a_tardanza" value="Tardanza">
+                        <input type="radio" name="asistencia" id="a_tardanza" value="Tardanza" onchange="sincronizarPuntualidad('Tardanza')">
                         <label for="a_tardanza">Tardanza</label>
                     </div>
                     <div class="radio-option">
@@ -906,65 +898,4 @@
 </div>
 
 <!-- MODAL 3: Añadir Nueva Persona -->
-<div class="modal-backdrop" id="modalNuevaPersona" onclick="cerrarModalFondo(event, 'modalNuevaPersona')">
-    <div class="modal-sheet">
-        <div class="modal-header">
-            <div>
-                <span>Directorio de Iglesia</span>
-                <h2>Añadir Nueva Persona</h2>
-            </div>
-            <button type="button" class="btn-close" onclick="cerrarModal('modalNuevaPersona')">✕</button>
-        </div>
-
-        <form id="formNuevaPersona" onsubmit="agregarNuevaPersona(event)">
-            <div class="form-group">
-                <label class="section-label" for="nuevoNombre">Nombres y Apellidos</label>
-                <input type="text" id="nuevoNombre" class="form-control" required placeholder="Ej. María Fernanda López" autocomplete="off">
-            </div>
-
-            <div class="form-group">
-                <label class="section-label" for="nuevoSalon">Asignar a Salón</label>
-                <select id="nuevoSalon" class="form-control" required></select>
-            </div>
-
-            <div class="form-group">
-                <label class="section-label" for="nuevaNotaInicial">Nota inicial / Referencia (Opcional)</label>
-                <input type="text" id="nuevaNotaInicial" class="form-control" placeholder="Ej. Invitado de la familia Quispe, teléfono, etc." autocomplete="off">
-            </div>
-
-            <div class="form-group">
-                <label style="display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-size:0.95rem; color: var(--text-dark);">
-                    <input type="checkbox" id="abrirRegistroAlCrear" checked style="width:20px; height:20px;">
-                    Marcar su asistencia inmediatamente después de añadir
-                </label>
-            </div>
-
-            <button type="submit" class="btn-primary">
-                Guardar en Lista
-            </button>
-        </form>
-    </div>
-</div>
-
-<!-- MODAL 4: Gestionar Salones y Encargados -->
-<div class="modal-backdrop" id="modalSalones" onclick="cerrarModalFondo(event, 'modalSalones')">
-    <div class="modal-sheet">
-        <div class="modal-header">
-            <div>
-                <span>Configuración</span>
-                <h2>Salones y Encargados</h2>
-            </div>
-            <button type="button" class="btn-close" onclick="cerrarModal('modalSalones')">✕</button>
-        </div>
-
-        <p style="margin-top:0; font-size:0.88rem; color: #64748b;">
-            Edita el nombre del salón o la persona encargada y pulsa <strong>Guardar</strong>.
-        </p>
-
-        <div class="salon-manage-list" id="salonManageList"></div>
-
-        <form class="add-salon-box" onsubmit="crearNuevoSalon(event)">
-            <label style="font-weight:700; font-size:0.9rem; color:var(--text-dark);">Añadir Nuevo Salón</label>
-            <input type="text" id="inputNuevoSalonNombre" placeholder="Nombre del nuevo salón (ej. Jóvenes)..." required autocomplete="off">
-            <input type="text" id="inputNuevoSalonEncargado" placeholder="Nombre de la persona encargada..." autocomplete="off">
-            <button type="submit" class="btn-primary" style="margin-top:0.2rem;">+ Crear
+<div class="modal-backdrop" id="
