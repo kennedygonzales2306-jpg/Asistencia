@@ -555,3 +555,1057 @@
 
         .tag-chip:active {
             background: var(--primary-light);
+            border-color: var(--primary);
+            color: var(--primary-hover);
+        }
+
+        .radio-group {
+            display: grid;
+            gap: 0.5rem;
+        }
+        .cols-3 { grid-template-columns: repeat(3, 1fr); }
+        .cols-2 { grid-template-columns: repeat(2, 1fr); }
+
+        .radio-option input { display: none; }
+        .radio-option label {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0.9rem 0.4rem;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 12px;
+            background: #f8fafc;
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            text-align: center;
+            user-select: none;
+        }
+
+        .radio-option input:checked + label {
+            background-color: var(--primary-light);
+            border-color: var(--primary);
+            color: var(--primary-hover);
+            font-weight: 800;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 1rem;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 0.4rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            min-height: 52px;
+        }
+
+        .btn-primary:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.35);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .salon-manage-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .salon-manage-card {
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+        }
+
+        .salon-manage-row {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .salon-manage-card input {
+            flex: 1;
+            padding: 0.7rem 0.8rem;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 0.92rem;
+            background-color: #ffffff;
+            color: var(--text-dark);
+        }
+
+        .btn-icon-save {
+            background-color: var(--success-bg);
+            color: var(--success-text);
+            border: none;
+            border-radius: 10px;
+            padding: 0.7rem 0.9rem;
+            font-weight: 800;
+            font-size: 0.85rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-icon-delete {
+            background-color: var(--error-bg);
+            color: var(--error-text);
+            border: none;
+            border-radius: 10px;
+            padding: 0.7rem 0.8rem;
+            font-weight: 800;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .add-salon-box {
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .add-salon-box input {
+            width: 100%;
+            padding: 0.8rem 0.9rem;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1e293b;
+            color: white;
+            padding: 0.9rem 1.25rem;
+            border-radius: 12px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+            transition: transform 0.25s ease;
+            z-index: 100;
+            text-align: center;
+            width: 90%;
+            max-width: 420px;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.success { background: #065f46; }
+        .toast.error { background: #991b1b; }
+    </style>
+</head>
+<body>
+
+<div class="bg-layer"></div>
+
+<div class="app-container">
+    <div class="church-header-banner">
+        Iglesia Bautista Gracia sobre Gracia • Callao
+    </div>
+
+    <div class="top-bar">
+        <div class="title-row">
+            <div>
+                <h1>Control de Asistencia</h1>
+                <span class="date-subtitle" id="currentDateLabel">Cargando fecha...</span>
+            </div>
+            <div class="header-actions">
+                <button type="button" class="btn-secondary-header" onclick="abrirModalSalones()">
+                    ⚙️ Salones
+                </button>
+                <button type="button" class="btn-add-person" onclick="abrirModalNuevaPersona()">
+                    + Persona
+                </button>
+            </div>
+        </div>
+
+        <div class="salones-tabs" id="salonesTabs"></div>
+
+        <div class="salon-info-bar">
+            <div class="encargado-box">
+                <span class="encargado-text">
+                    👤 Encargado: <strong id="encargadoSalonTexto">Sin asignar</strong>
+                </span>
+                <button type="button" class="btn-edit-encargado" title="Cambiar encargado" onclick="editarEncargadoRapido()">
+                    ✏️
+                </button>
+            </div>
+            <button type="button" class="btn-ofrenda-salon" onclick="abrirModalOfrendaSalon()">
+                💰 Ofrenda: <span id="ofrendaSalonTexto">S/ 0.00</span>
+            </button>
+        </div>
+
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="Buscar nombre..." oninput="filtrarPersonas()">
+            <button type="button" class="clear-search" id="clearSearchBtn" onclick="limpiarBusqueda()">✕</button>
+        </div>
+    </div>
+
+    <div class="stats-bar">
+        <span>Salón: <strong id="salonActualTexto">Salón 1</strong></span>
+        <span>Asistencia hoy: <strong id="contadorRegistrados">0 / 0</strong></span>
+    </div>
+
+    <div class="person-list" id="personList"></div>
+</div>
+
+<!-- MODAL 1: Registrar Asistencia Individual -->
+<div class="modal-backdrop" id="modalAsistencia" onclick="cerrarModalFondo(event, 'modalAsistencia')">
+    <div class="modal-sheet">
+        <div class="modal-header">
+            <div>
+                <span id="modalSalonTag">Salón 1</span>
+                <h2 id="modalNombrePersona">Nombre de Persona</h2>
+            </div>
+            <button type="button" class="btn-close" onclick="cerrarModal('modalAsistencia')">✕</button>
+        </div>
+
+        <form id="formAsistencia" onsubmit="guardarAsistencia(event)">
+            <div class="form-group">
+                <label class="section-label">Asistencia</label>
+                <div class="radio-group cols-3">
+                    <div class="radio-option">
+                        <input type="radio" name="asistencia" id="a_presente" value="Presente" checked>
+                        <label for="a_presente">Presente</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="asistencia" id="a_tardanza" value="Tardanza">
+                        <label for="a_tardanza">Tardanza</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="asistencia" id="a_ausente" value="Ausente">
+                        <label for="a_ausente">Ausente</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="section-label">Puntualidad</label>
+                <div class="radio-group cols-2">
+                    <div class="radio-option">
+                        <input type="radio" name="puntualidad" id="p_atiempo" value="A tiempo" checked>
+                        <label for="p_atiempo">A tiempo</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="puntualidad" id="p_tarde" value="Tarde">
+                        <label for="p_tarde">Tarde</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="section-label">¿Trajo su Biblia?</label>
+                <div class="radio-group cols-2">
+                    <div class="radio-option">
+                        <input type="radio" name="biblias" id="b_si" value="Sí" checked>
+                        <label for="b_si">Sí</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="biblias" id="b_no" value="No">
+                        <label for="b_no">No</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="section-label" for="observacionesInput">Observaciones / Notas adicionales (Opcional)</label>
+                <div class="quick-tags">
+                    <button type="button" class="tag-chip" onclick="agregarEtiquetaObs('Primera visita')">+ Primera visita</button>
+                    <button type="button" class="tag-chip" onclick="agregarEtiquetaObs('Trajo invitado')">+ Trajo invitado</button>
+                    <button type="button" class="tag-chip" onclick="agregarEtiquetaObs('Petición de oración')">+ Petición de oración</button>
+                    <button type="button" class="tag-chip" onclick="agregarEtiquetaObs('Justificó inasistencia')">+ Justificó</button>
+                </div>
+                <input type="text" id="observacionesInput" class="form-control" placeholder="Escribe un detalle o nota adicional..." autocomplete="off">
+            </div>
+
+            <button type="submit" class="btn-primary" id="btnGuardarAsistencia">
+                <span class="spinner" id="spinnerEnvio"></span>
+                <span id="textoBtnGuardar">Confirmar Registro</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL 2: Registrar Ofrenda General del Salón -->
+<div class="modal-backdrop" id="modalOfrendaSalon" onclick="cerrarModalFondo(event, 'modalOfrendaSalon')">
+    <div class="modal-sheet">
+        <div class="modal-header">
+            <div>
+                <span id="ofrendaModalSubtitulo">Ofrenda General por Salón</span>
+                <h2 id="ofrendaModalTitulo">Salón 1</h2>
+            </div>
+            <button type="button" class="btn-close" onclick="cerrarModal('modalOfrendaSalon')">✕</button>
+        </div>
+
+        <form id="formOfrendaSalon" onsubmit="guardarOfrendaSalon(event)">
+            <div class="form-group">
+                <label class="section-label">Encargado del Salón</label>
+                <input type="text" id="ofrendaEncargadoInput" class="form-control" placeholder="Nombre del maestro o encargado..." required autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label class="section-label" for="ofrendaMontoSalonInput">Monto Total de Ofrenda del Salón (S/)</label>
+                <input type="number" id="ofrendaMontoSalonInput" class="form-control" placeholder="0.00" step="0.10" min="0" inputmode="decimal" required>
+            </div>
+
+            <button type="submit" class="btn-primary" id="btnGuardarOfrendaSalon">
+                <span class="spinner" id="spinnerOfrenda"></span>
+                <span id="textoBtnOfrenda">Guardar Ofrenda del Salón</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL 3: Añadir Nueva Persona -->
+<div class="modal-backdrop" id="modalNuevaPersona" onclick="cerrarModalFondo(event, 'modalNuevaPersona')">
+    <div class="modal-sheet">
+        <div class="modal-header">
+            <div>
+                <span>Directorio de Iglesia</span>
+                <h2>Añadir Nueva Persona</h2>
+            </div>
+            <button type="button" class="btn-close" onclick="cerrarModal('modalNuevaPersona')">✕</button>
+        </div>
+
+        <form id="formNuevaPersona" onsubmit="agregarNuevaPersona(event)">
+            <div class="form-group">
+                <label class="section-label" for="nuevoNombre">Nombres y Apellidos</label>
+                <input type="text" id="nuevoNombre" class="form-control" required placeholder="Ej. María Fernanda López" autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label class="section-label" for="nuevoSalon">Asignar a Salón</label>
+                <select id="nuevoSalon" class="form-control" required></select>
+            </div>
+
+            <div class="form-group">
+                <label class="section-label" for="nuevaNotaInicial">Nota inicial / Referencia (Opcional)</label>
+                <input type="text" id="nuevaNotaInicial" class="form-control" placeholder="Ej. Invitado de la familia Quispe, teléfono, etc." autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label style="display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-size:0.95rem; color: var(--text-dark);">
+                    <input type="checkbox" id="abrirRegistroAlCrear" checked style="width:20px; height:20px;">
+                    Marcar su asistencia inmediatamente después de añadir
+                </label>
+            </div>
+
+            <button type="submit" class="btn-primary" id="btnGuardarNuevaPersona">
+                <span class="spinner" id="spinnerNuevaPersona"></span>
+                <span id="textoBtnNuevaPersona">Guardar en Lista y Sheets</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL 4: Gestionar Salones y Encargados -->
+<div class="modal-backdrop" id="modalSalones" onclick="cerrarModalFondo(event, 'modalSalones')">
+    <div class="modal-sheet">
+        <div class="modal-header">
+            <div>
+                <span>Configuración</span>
+                <h2>Salones y Encargados</h2>
+            </div>
+            <button type="button" class="btn-close" onclick="cerrarModal('modalSalones')">✕</button>
+        </div>
+
+        <p style="margin-top:0; font-size:0.88rem; color: #64748b;">
+            Edita el nombre del salón o la persona encargada y pulsa <strong>Guardar</strong>. Todos los cambios se sincronizan con Google Sheets.
+        </p>
+
+        <div class="salon-manage-list" id="salonManageList"></div>
+
+        <form class="add-salon-box" onsubmit="crearNuevoSalon(event)">
+            <label style="font-weight:700; font-size:0.9rem; color:var(--text-dark);">Añadir Nuevo Salón</label>
+            <input type="text" id="inputNuevoSalonNombre" placeholder="Nombre del nuevo salón (ej. Jóvenes)..." required autocomplete="off">
+            <input type="text" id="inputNuevoSalonEncargado" placeholder="Nombre de la persona encargada..." autocomplete="off">
+            <button type="submit" class="btn-primary" style="margin-top:0.2rem;">+ Crear Salón</button>
+        </form>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzqSRlTuvhvJx6paYt2fLQ1jUBlbUFrqPUIla6qxEMIE5eK5NRICrZzFJ96-Gs23Nxe-w/exec';
+
+    let listaSalones = JSON.parse(localStorage.getItem('iglesia_salones')) || [
+        { id: 'sal_1', nombre: 'Salón 1', encargado: 'Por asignar', ofrendaHoy: 0, fechaOfrenda: '' },
+        { id: 'sal_2', nombre: 'Salón 2', encargado: 'Por asignar', ofrendaHoy: 0, fechaOfrenda: '' },
+        { id: 'sal_3', nombre: 'Salón 3', encargado: 'Por asignar', ofrendaHoy: 0, fechaOfrenda: '' },
+        { id: 'sal_4', nombre: 'Salón 4', encargado: 'Por asignar', ofrendaHoy: 0, fechaOfrenda: '' },
+        { id: 'sal_5', nombre: 'Salón 5', encargado: 'Por asignar', ofrendaHoy: 0, fechaOfrenda: '' }
+    ];
+
+    listaSalones.forEach(s => {
+        if (typeof s.encargado === 'undefined') s.encargado = 'Por asignar';
+        if (typeof s.ofrendaHoy === 'undefined') s.ofrendaHoy = 0;
+        if (typeof s.fechaOfrenda === 'undefined') s.fechaOfrenda = '';
+    });
+
+    let directorioPersonas = JSON.parse(localStorage.getItem('iglesia_personas')) || [
+        { id: 1, nombre: 'Carlos Mendoza Ruiz', salonId: 'sal_1', registradoHoy: false, fechaUltimoRegistro: '', detalle: '', observaciones: '' },
+        { id: 2, nombre: 'Ana Sofía Torres', salonId: 'sal_1', registradoHoy: false, fechaUltimoRegistro: '', detalle: '', observaciones: '' },
+        { id: 3, nombre: 'Luis Alberto Quispe', salonId: 'sal_1', registradoHoy: false, fechaUltimoRegistro: '', detalle: '', observaciones: '' },
+        { id: 4, nombre: 'Valeria Gómez Díaz', salonId: 'sal_2', registradoHoy: false, fechaUltimoRegistro: '', detalle: '', observaciones: '' },
+        { id: 5, nombre: 'Jorge Luis Castillo', salonId: 'sal_2', registradoHoy: false, fechaUltimoRegistro: '', detalle: '', observaciones: '' },
+        { id: 6, nombre: 'Rosa Elena Paredes', salonId: 'sal_3', registradoHoy: false, fechaUltimoRegistro: '', detalle: '', observaciones: '' },
+        { id: 7, nombre: 'Mateo Sebastián Rojas', salonId: 'sal_4', registradoHoy: false, fechaUltimoRegistro: '', detalle: '', observaciones: '' },
+        { id: 8, nombre: 'Camila Andrea Vargas', salonId: 'sal_5', registradoHoy: false, fechaUltimoRegistro: '', detalle: '', observaciones: '' }
+    ];
+
+    directorioPersonas.forEach(p => {
+        if (typeof p.observaciones === 'undefined') p.observaciones = '';
+    });
+
+    let salonActivoId = listaSalones[0].id;
+    let personaActiva = null;
+
+    function obtenerFechaClaveHoy() {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function verificarReinicioDiario() {
+        const hoyClave = obtenerFechaClaveHoy();
+        let huboCambios = false;
+
+        directorioPersonas.forEach(p => {
+            if (p.registradoHoy && p.fechaUltimoRegistro !== hoyClave) {
+                p.registradoHoy = false;
+                p.detalle = '';
+                huboCambios = true;
+            }
+        });
+
+        listaSalones.forEach(s => {
+            if (s.ofrendaHoy > 0 && s.fechaOfrenda !== hoyClave) {
+                s.ofrendaHoy = 0;
+                huboCambios = true;
+            }
+        });
+
+        if (huboCambios) guardarEstadoLocal();
+    }
+
+    function guardarEstadoLocal() {
+        localStorage.setItem('iglesia_salones', JSON.stringify(listaSalones));
+        localStorage.setItem('iglesia_personas', JSON.stringify(directorioPersonas));
+    }
+
+    function obtenerSalonObj(salonId) {
+        return listaSalones.find(item => item.id === salonId) || listaSalones[0];
+    }
+
+    function obtenerNombreSalon(salonId) {
+        const s = obtenerSalonObj(salonId);
+        return s ? s.nombre : 'Sin salón';
+    }
+
+    // Sincronizar salones y nuevas personas desde Google Sheets al abrir la app
+    async function cargarDatosDesdeSheets() {
+        try {
+            const response = await fetch(SCRIPT_URL, { method: 'GET', redirect: 'follow' });
+            const data = await response.json();
+
+            if (data.status === 'ok') {
+                let actualizado = false;
+
+                if (Array.isArray(data.salones) && data.salones.length > 0) {
+                    const hoyClave = obtenerFechaClaveHoy();
+                    listaSalones = data.salones.map(remoto => {
+                        const local = listaSalones.find(l => l.id === remoto.id);
+                        return {
+                            id: remoto.id,
+                            nombre: remoto.nombre,
+                            encargado: remoto.encargado || 'Por asignar',
+                            ofrendaHoy: (local && local.fechaOfrenda === hoyClave) ? local.ofrendaHoy : 0,
+                            fechaOfrenda: (local && local.fechaOfrenda === hoyClave) ? local.fechaOfrenda : ''
+                        };
+                    });
+                    actualizado = true;
+                }
+
+                if (Array.isArray(data.personas) && data.personas.length > 0) {
+                    data.personas.forEach(remota => {
+                        const existe = directorioPersonas.some(p =>
+                            String(p.id) === String(remota.id) ||
+                            p.nombre.toLowerCase() === remota.nombre.toLowerCase()
+                        );
+                        if (!existe) {
+                            directorioPersonas.unshift({
+                                id: remota.id,
+                                nombre: remota.nombre,
+                                salonId: remota.salonId || 'sal_1',
+                                registradoHoy: false,
+                                fechaUltimoRegistro: '',
+                                detalle: '',
+                                observaciones: remota.observaciones || ''
+                            });
+                            actualizado = true;
+                        }
+                    });
+                }
+
+                if (actualizado) {
+                    guardarEstadoLocal();
+                    renderizarTabsSalones();
+                    renderizarLista();
+                }
+            }
+        } catch (err) {
+            console.log('Modo local activo:', err);
+        }
+    }
+
+    async function sincronizarSalonesConSheets() {
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                redirect: 'follow',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    tipo: 'sync_salones',
+                    salones: listaSalones
+                })
+            });
+            const result = await response.json();
+            if (result.status === 'success') {
+                mostrarToast(result.message, 'success');
+            }
+        } catch (error) {
+            console.error('Error sincronizando salones:', error);
+            mostrarToast('Cambios guardados localmente (sin conexión a Sheets)', 'error');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        verificarReinicioDiario();
+
+        const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const hoy = new Date().toLocaleDateString('es-PE', opcionesFecha);
+        document.getElementById('currentDateLabel').innerText = hoy.charAt(0).toUpperCase() + hoy.slice(1);
+
+        document.querySelectorAll('input[name="asistencia"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.value === 'Tardanza') {
+                    document.getElementById('p_tarde').checked = true;
+                } else if (e.target.value === 'Presente') {
+                    document.getElementById('p_atiempo').checked = true;
+                }
+            });
+        });
+
+        renderizarTabsSalones();
+        renderizarLista();
+        cargarDatosDesdeSheets();
+    });
+
+    function renderizarTabsSalones() {
+        const contenedor = document.getElementById('salonesTabs');
+        contenedor.innerHTML = '';
+
+        if (!listaSalones.some(s => s.id === salonActivoId) && listaSalones.length > 0) {
+            salonActivoId = listaSalones[0].id;
+        }
+
+        listaSalones.forEach(salon => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `salon-tab ${salon.id === salonActivoId ? 'active' : ''}`;
+            btn.innerText = salon.nombre;
+            btn.onclick = () => seleccionarSalon(salon.id);
+            contenedor.appendChild(btn);
+        });
+
+        const salonActual = obtenerSalonObj(salonActivoId);
+        document.getElementById('salonActualTexto').innerText = salonActual.nombre;
+        document.getElementById('encargadoSalonTexto').innerText = salonActual.encargado || 'Por asignar';
+        document.getElementById('ofrendaSalonTexto').innerText = `S/ ${(Number(salonActual.ofrendaHoy) || 0).toFixed(2)}`;
+        document.getElementById('searchInput').placeholder = `Buscar nombre en ${salonActual.nombre}...`;
+    }
+
+    function seleccionarSalon(salonId) {
+        salonActivoId = salonId;
+        renderizarTabsSalones();
+        renderizarLista();
+    }
+
+    function filtrarPersonas() {
+        const texto = document.getElementById('searchInput').value;
+        document.getElementById('clearSearchBtn').style.display = texto.length > 0 ? 'flex' : 'none';
+        renderizarLista();
+    }
+
+    function limpiarBusqueda() {
+        const input = document.getElementById('searchInput');
+        input.value = '';
+        document.getElementById('clearSearchBtn').style.display = 'none';
+        input.focus();
+        renderizarLista();
+    }
+
+    function renderizarLista() {
+        const contenedor = document.getElementById('personList');
+        const filtro = document.getElementById('searchInput').value.toLowerCase().trim();
+        const nombreSalonActual = obtenerNombreSalon(salonActivoId);
+
+        const personasDelSalon = directorioPersonas.filter(p => p.salonId === salonActivoId);
+        const registradosCount = personasDelSalon.filter(p => p.registradoHoy).length;
+        document.getElementById('contadorRegistrados').innerText = `${registradosCount} / ${personasDelSalon.length}`;
+
+        const filtradas = personasDelSalon.filter(p => p.nombre.toLowerCase().includes(filtro));
+
+        contenedor.innerHTML = '';
+
+        if (filtradas.length === 0) {
+            const valorBuscado = document.getElementById('searchInput').value.trim();
+            const mensaje = filtro 
+                ? `No se encontró a <strong>"${valorBuscado}"</strong> en ${nombreSalonActual}.`
+                : `Aún no hay personas registradas en <strong>${nombreSalonActual}</strong>.`;
+
+            contenedor.innerHTML = `
+                <div class="empty-state">
+                    <p>${mensaje}</p>
+                    <button type="button" onclick="abrirModalConNombre()">+ Añadir persona a ${nombreSalonActual}</button>
+                </div>
+            `;
+            return;
+        }
+
+        filtradas.forEach(persona => {
+            const card = document.createElement('div');
+            card.className = `person-card ${persona.registradoHoy ? 'registered' : ''}`;
+            card.onclick = () => abrirModalAsistencia(persona);
+
+            const obsHtml = persona.observaciones
+                ? `<span class="obs-pill">📝 ${persona.observaciones}</span>`
+                : '';
+
+            card.innerHTML = `
+                <div class="person-info">
+                    <h3>${persona.nombre}</h3>
+                    <p>${persona.registradoHoy ? persona.detalle : 'Toca para registrar asistencia'}</p>
+                    ${obsHtml}
+                </div>
+                <span class="badge ${persona.registradoHoy ? 'done' : 'pending'}">
+                    ${persona.registradoHoy ? '✓ Listo' : 'Registrar'}
+                </span>
+            `;
+            contenedor.appendChild(card);
+        });
+    }
+
+    // --- Edición rápida de Encargado y Modal de Ofrenda General por Salón ---
+    function editarEncargadoRapido() {
+        abrirModalSalones();
+        setTimeout(() => {
+            const inputEnc = document.getElementById(`edit_enc_${salonActivoId}`);
+            if (inputEnc) inputEnc.focus();
+        }, 120);
+    }
+
+    function abrirModalOfrendaSalon() {
+        const salonActual = obtenerSalonObj(salonActivoId);
+        document.getElementById('ofrendaModalTitulo').innerText = salonActual.nombre;
+        document.getElementById('ofrendaEncargadoInput').value = (salonActual.encargado && salonActual.encargado !== 'Por asignar') ? salonActual.encargado : '';
+        document.getElementById('ofrendaMontoSalonInput').value = salonActual.ofrendaHoy > 0 ? salonActual.ofrendaHoy : '';
+        document.getElementById('modalOfrendaSalon').classList.add('open');
+        setTimeout(() => document.getElementById('ofrendaMontoSalonInput').focus(), 100);
+    }
+
+    async function guardarOfrendaSalon(e) {
+        e.preventDefault();
+        const salonActual = obtenerSalonObj(salonActivoId);
+        const encargadoVal = document.getElementById('ofrendaEncargadoInput').value.trim() || 'Por asignar';
+        const montoVal = Number(document.getElementById('ofrendaMontoSalonInput').value) || 0;
+
+        const btn = document.getElementById('btnGuardarOfrendaSalon');
+        const spinner = document.getElementById('spinnerOfrenda');
+        const textoBtn = document.getElementById('textoBtnOfrenda');
+
+        const cambioEncargado = salonActual.encargado !== encargadoVal;
+        salonActual.encargado = encargadoVal;
+        salonActual.ofrendaHoy = montoVal;
+        salonActual.fechaOfrenda = obtenerFechaClaveHoy();
+        guardarEstadoLocal();
+        renderizarTabsSalones();
+
+        if (cambioEncargado) {
+            sincronizarSalonesConSheets();
+        }
+
+        const payload = {
+            tipo: 'ofrenda_salon',
+            salon: salonActual.nombre,
+            encargado: encargadoVal,
+            ofrenda: montoVal
+        };
+
+        btn.disabled = true;
+        spinner.style.display = 'inline-block';
+        textoBtn.innerText = 'Enviando...';
+
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                redirect: 'follow',
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8',
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            if (result.status === 'success') {
+                cerrarModal('modalOfrendaSalon');
+                mostrarToast(result.message, 'success');
+            } else {
+                throw new Error(result.message || 'Error al guardar ofrenda');
+            }
+        } catch (error) {
+            console.error('Error al enviar ofrenda:', error);
+            cerrarModal('modalOfrendaSalon');
+            mostrarToast(`Ofrenda S/ ${montoVal.toFixed(2)} guardada en el dispositivo`, 'error');
+        } finally {
+            btn.disabled = false;
+            spinner.style.display = 'none';
+            textoBtn.innerText = 'Guardar Ofrenda del Salón';
+        }
+    }
+
+    // --- Gestión de Salones y Encargados ---
+    function abrirModalSalones() {
+        renderizarListaGestionSalones();
+        document.getElementById('modalSalones').classList.add('open');
+    }
+
+    function renderizarListaGestionSalones() {
+        const contenedor = document.getElementById('salonManageList');
+        contenedor.innerHTML = '';
+
+        listaSalones.forEach(salon => {
+            const cantidadPersonas = directorioPersonas.filter(p => p.salonId === salon.id).length;
+            const card = document.createElement('div');
+            card.className = 'salon-manage-card';
+
+            card.innerHTML = `
+                <div class="salon-manage-row">
+                    <input type="text" id="edit_salon_${salon.id}" value="${salon.nombre}" placeholder="Nombre del salón">
+                    ${listaSalones.length > 1 ? `<button type="button" class="btn-icon-delete" title="Eliminar salón" onclick="eliminarSalon('${salon.id}', ${cantidadPersonas})">✕</button>` : ''}
+                </div>
+                <div class="salon-manage-row">
+                    <input type="text" id="edit_enc_${salon.id}" value="${salon.encargado || ''}" placeholder="Nombre del encargado...">
+                    <button type="button" class="btn-icon-save" onclick="guardarCambiosSalon('${salon.id}')">Guardar</button>
+                </div>
+            `;
+            contenedor.appendChild(card);
+        });
+    }
+
+    function guardarCambiosSalon(salonId) {
+        const inputNombre = document.getElementById(`edit_salon_${salonId}`);
+        const inputEncargado = document.getElementById(`edit_enc_${salonId}`);
+        const nuevoNombre = inputNombre.value.trim();
+        const nuevoEncargado = inputEncargado.value.trim() || 'Por asignar';
+
+        if (!nuevoNombre) {
+            mostrarToast('El nombre del salón no puede estar vacío', 'error');
+            return;
+        }
+
+        const salon = listaSalones.find(s => s.id === salonId);
+        if (salon) {
+            salon.nombre = nuevoNombre;
+            salon.encargado = nuevoEncargado;
+            guardarEstadoLocal();
+            renderizarTabsSalones();
+            renderizarLista();
+            sincronizarSalonesConSheets();
+        }
+    }
+
+    function crearNuevoSalon(e) {
+        e.preventDefault();
+        const inputNombre = document.getElementById('inputNuevoSalonNombre');
+        const inputEncargado = document.getElementById('inputNuevoSalonEncargado');
+        const nombre = inputNombre.value.trim();
+        const encargado = inputEncargado.value.trim() || 'Por asignar';
+        if (!nombre) return;
+
+        const nuevoId = 'sal_' + Date.now();
+        listaSalones.push({
+            id: nuevoId,
+            nombre: nombre,
+            encargado: encargado,
+            ofrendaHoy: 0,
+            fechaOfrenda: ''
+        });
+        guardarEstadoLocal();
+
+        inputNombre.value = '';
+        inputEncargado.value = '';
+        salonActivoId = nuevoId;
+        renderizarListaGestionSalones();
+        renderizarTabsSalones();
+        renderizarLista();
+        sincronizarSalonesConSheets();
+    }
+
+    function eliminarSalon(salonId, cantidadPersonas) {
+        if (cantidadPersonas > 0) {
+            mostrarToast(`No puedes eliminar un salón con ${cantidadPersonas} persona(s) inscrita(s)`, 'error');
+            return;
+        }
+
+        listaSalones = listaSalones.filter(s => s.id !== salonId);
+        guardarEstadoLocal();
+        renderizarListaGestionSalones();
+        renderizarTabsSalones();
+        renderizarLista();
+        sincronizarSalonesConSheets();
+    }
+
+    // --- Modal de Asistencia Individual y Observaciones ---
+    function abrirModalAsistencia(persona) {
+        personaActiva = persona;
+        const salonObj = obtenerSalonObj(persona.salonId);
+        document.getElementById('modalSalonTag').innerText = `${salonObj.nombre} • Encargado: ${salonObj.encargado || 'Por asignar'}`;
+        document.getElementById('modalNombrePersona').innerText = persona.nombre;
+        document.getElementById('formAsistencia').reset();
+        document.getElementById('observacionesInput').value = persona.observaciones || '';
+        document.getElementById('modalAsistencia').classList.add('open');
+    }
+
+    function agregarEtiquetaObs(texto) {
+        const input = document.getElementById('observacionesInput');
+        const actual = input.value.trim();
+        if (!actual) {
+            input.value = texto;
+        } else if (!actual.toLowerCase().includes(texto.toLowerCase())) {
+            input.value = `${actual}, ${texto}`;
+        }
+        input.focus();
+    }
+
+    function poblarSelectSalones() {
+        const select = document.getElementById('nuevoSalon');
+        select.innerHTML = '';
+        listaSalones.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.id;
+            opt.innerText = `${s.nombre} (${s.encargado || 'Sin encargado'})`;
+            select.appendChild(opt);
+        });
+        select.value = salonActivoId;
+    }
+
+    function abrirModalNuevaPersona() {
+        document.getElementById('formNuevaPersona').reset();
+        poblarSelectSalones();
+        document.getElementById('modalNuevaPersona').classList.add('open');
+        setTimeout(() => document.getElementById('nuevoNombre').focus(), 100);
+    }
+
+    function abrirModalConNombre() {
+        const nombreBuscado = document.getElementById('searchInput').value.trim();
+        abrirModalNuevaPersona();
+        document.getElementById('nuevoNombre').value = nombreBuscado;
+    }
+
+    function cerrarModal(id) {
+        document.getElementById(id).classList.remove('open');
+    }
+
+    function cerrarModalFondo(e, id) {
+        if (e.target.id === id) cerrarModal(id);
+    }
+
+    async function guardarAsistencia(e) {
+        e.preventDefault();
+        if (!personaActiva) return;
+
+        const btn = document.getElementById('btnGuardarAsistencia');
+        const textoBtn = document.getElementById('textoBtnGuardar');
+        const spinner = document.getElementById('spinnerEnvio');
+
+        const asistencia = document.querySelector('input[name="asistencia"]:checked').value;
+        const puntualidad = document.querySelector('input[name="puntualidad"]:checked').value;
+        const biblias = document.querySelector('input[name="biblias"]:checked').value;
+        const observaciones = document.getElementById('observacionesInput').value.trim();
+        const salonObj = obtenerSalonObj(personaActiva.salonId);
+
+        const payload = {
+            tipo: 'asistencia',
+            salon: salonObj.nombre,
+            encargado: salonObj.encargado || 'Por asignar',
+            nombres: personaActiva.nombre,
+            asistencia: asistencia,
+            puntualidad: puntualidad,
+            biblias: biblias,
+            observaciones: observaciones
+        };
+
+        btn.disabled = true;
+        spinner.style.display = 'inline-block';
+        textoBtn.innerText = 'Enviando...';
+
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                redirect: 'follow',
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8',
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                personaActiva.registradoHoy = true;
+                personaActiva.fechaUltimoRegistro = obtenerFechaClaveHoy();
+                personaActiva.observaciones = observaciones;
+                personaActiva.detalle = `${asistencia} • ${puntualidad} • Biblia: ${biblias}`;
+                guardarEstadoLocal();
+
+                cerrarModal('modalAsistencia');
+                renderizarLista();
+                mostrarToast(result.message || `✓ Asistencia de ${personaActiva.nombre} guardada`, 'success');
+            } else {
+                throw new Error(result.message || 'Error en respuesta del servidor');
+            }
+
+        } catch (error) {
+            console.error('Fallo de envío:', error);
+            personaActiva.registradoHoy = true;
+            personaActiva.fechaUltimoRegistro = obtenerFechaClaveHoy();
+            personaActiva.observaciones = observaciones;
+            personaActiva.detalle = `(Respaldo local) ${asistencia} • ${puntualidad} • Biblia: ${biblias}`;
+            guardarEstadoLocal();
+
+            cerrarModal('modalAsistencia');
+            renderizarLista();
+            mostrarToast('Guardado en respaldo local (sin conexión a Sheets)', 'error');
+        } finally {
+            btn.disabled = false;
+            spinner.style.display = 'none';
+            textoBtn.innerText = 'Confirmar Registro';
+        }
+    }
+
+    async function agregarNuevaPersona(e) {
+        e.preventDefault();
+        const nombre = document.getElementById('nuevoNombre').value.trim();
+        const salonId = document.getElementById('nuevoSalon').value;
+        const notaInicial = document.getElementById('nuevaNotaInicial').value.trim();
+        const abrirRegistro = document.getElementById('abrirRegistroAlCrear').checked;
+
+        if (!nombre) return;
+
+        const btn = document.getElementById('btnGuardarNuevaPersona');
+        const spinner = document.getElementById('spinnerNuevaPersona');
+        const textoBtn = document.getElementById('textoBtnNuevaPersona');
+
+        const nuevaPersona = {
+            id: Date.now(),
+            nombre: nombre,
+            salonId: salonId,
+            registradoHoy: false,
+            fechaUltimoRegistro: '',
+            detalle: '',
+            observaciones: notaInicial
+        };
+
+        directorioPersonas.unshift(nuevaPersona);
+        guardarEstadoLocal();
+
+        btn.disabled = true;
+        spinner.style.display = 'inline-block';
+        textoBtn.innerText = 'Guardando...';
+
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                redirect: 'follow',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    tipo: 'nueva_persona',
+                    id: nuevaPersona.id,
+                    nombre: nombre,
+                    salonId: salonId,
+                    salonNombre: obtenerNombreSalon(salonId),
+                    observaciones: notaInicial
+                })
+            });
+            const result = await response.json();
+            mostrarToast(result.message || `+ ${nombre} guardado en Sheets`, 'success');
+        } catch (err) {
+            console.error('Error guardando nueva persona en Sheets:', err);
+            mostrarToast(`+ ${nombre} añadido localmente`, 'success');
+        } finally {
+            btn.disabled = false;
+            spinner.style.display = 'none';
+            textoBtn.innerText = 'Guardar en Lista y Sheets';
+        }
+
+        cerrarModal('modalNuevaPersona');
+        limpiarBusqueda();
+
+        if (salonId !== salonActivoId) {
+            seleccionarSalon(salonId);
+        } else {
+            renderizarLista();
+        }
+
+        if (abrirRegistro) {
+            setTimeout(() => abrirModalAsistencia(nuevaPersona), 350);
+        }
+    }
+
+    function mostrarToast(mensaje, tipo = 'success') {
+        const toast = document.getElementById('toast');
+        toast.innerText = mensaje;
+        toast.className = `toast show ${tipo}`;
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3200);
+    }
+</script>
+
+</body>
+</html>
