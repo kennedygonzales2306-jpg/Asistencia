@@ -993,9 +993,12 @@
 <div class="toast" id="toast"></div>
 
 <script>
-    // Conserva aquí exactamente tu mismo enlace actual de Google Apps Script:
+    // =========================================================================
+    // CONFIGURACIÓN: REEMPLAZA ESTA URL CON LA DE TU WEB APP DE APPS SCRIPT
+    // =========================================================================
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzqSRlTuvhvJx6paYt2fLQ1jUBlbUFrqPUIla6qxEMIE5eK5NRICrZzFJ96-Gs23Nxe-w/exec";
 
+    // Estado en memoria
     let salones = [
         { nombre: "Párvulos", encargado: "Elsa", ofrenda: 0 },
         { nombre: "Intermedio", encargado: "Sin asignar", ofrenda: 0 },
@@ -1029,6 +1032,14 @@
     async function cargarDatosDesdeSheets() {
         const listEl = document.getElementById("personList");
         listEl.innerHTML = `<div class="empty-state">Cargando salones y alumnos desde Google Sheets...</div>`;
+
+        if (!SCRIPT_URL || SCRIPT_URL.includes("PEGA_AQUI")) {
+            salonActual = salones[0].nombre;
+            renderizarSalones();
+            renderizarPersonas();
+            mostrarToast("Configura SCRIPT_URL en el código para conectar con Sheets", "error");
+            return;
+        }
 
         try {
             const res = await fetch(`${SCRIPT_URL}?action=getData&fecha=${encodeURIComponent(fechaHoyISO)}`);
@@ -1201,9 +1212,7 @@
         if (!personaSeleccionada) return;
 
         const asistencia = document.querySelector('input[name="asistencia"]:checked').value;
-        const puntualidad = asistencia === "Ausente"
-            ? "No"
-            : (document.querySelector('input[name="puntualidad"]:checked').value === "A tiempo" ? "Sí" : "Tarde");
+        const puntualidad = asistencia === "Ausente" ? "No" : (document.querySelector('input[name="puntualidad"]:checked').value === "A tiempo" ? "Sí" : "Tarde");
         const biblias = asistencia === "Ausente" ? "No" : document.querySelector('input[name="biblias"]:checked').value;
         const observaciones = document.getElementById("observacionesInput").value.trim();
 
@@ -1547,6 +1556,9 @@
 
     // --- UTILIDADES ---
     async function enviarPostSheets(payload) {
+        if (!SCRIPT_URL || SCRIPT_URL.includes("PEGA_AQUI")) {
+            return { success: true }; // Modo local si aún no se configura URL
+        }
         const response = await fetch(SCRIPT_URL, {
             method: "POST",
             body: JSON.stringify(payload)
