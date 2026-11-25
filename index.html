@@ -2,24 +2,22 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#ea580c">
-    <title>Asistencia - Iglesia Bautista Gracia sobre Gracia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Control de Asistencia - Escuela Dominical</title>
     <style>
         :root {
             --primary: #ea580c;
             --primary-hover: #c2410c;
-            --primary-light: rgba(254, 243, 199, 0.96);
-            --text-main: #ffffff;
-            --text-dark: #0f172a;
-            --text-muted: #f1f5f9;
-            --border-glass: rgba(255, 255, 255, 0.4);
+            --primary-light: #ffedd5;
             --success: #10b981;
-            --success-bg: rgba(209, 250, 229, 0.95);
-            --success-text: #065f46;
-            --error: #ef4444;
-            --error-bg: rgba(254, 226, 226, 0.95);
+            --success-bg: #dcfce7;
+            --success-text: #166534;
+            --error-bg: #fee2e2;
             --error-text: #991b1b;
+            --text-main: #ffffff;
+            --text-muted: #e2e8f0;
+            --text-dark: #0f172a;
+            --border-glass: rgba(255, 255, 255, 0.35);
         }
 
         * {
@@ -563,7 +561,6 @@
             display: grid;
             gap: 0.5rem;
         }
-        .cols-3 { grid-template-columns: repeat(3, 1fr); }
         .cols-2 { grid-template-columns: repeat(2, 1fr); }
 
         .radio-option input { display: none; }
@@ -610,6 +607,39 @@
 
         .btn-primary:disabled {
             background-color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .delete-student-zone {
+            margin-top: 1.25rem;
+            padding-top: 1rem;
+            border-top: 1px dashed #cbd5e1;
+            text-align: center;
+        }
+
+        .btn-delete-student {
+            width: 100%;
+            background-color: var(--error-bg);
+            color: var(--error-text);
+            border: 1.5px solid rgba(153, 27, 27, 0.25);
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            font-size: 0.92rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.45rem;
+            transition: transform 0.15s ease, opacity 0.15s ease;
+        }
+
+        .btn-delete-student:active {
+            transform: scale(0.98);
+        }
+
+        .btn-delete-student:disabled {
+            opacity: 0.6;
             cursor: not-allowed;
         }
 
@@ -733,7 +763,7 @@
 
 <div class="app-container">
     <div class="church-header-banner">
-        Iglesia Bautista Gracia sobre Gracia • Callao
+        Escuela Dominical • Registro de Asistencia
     </div>
 
     <div class="top-bar">
@@ -776,20 +806,20 @@
     </div>
 
     <div class="stats-bar">
-        <span>Salón: <strong id="salonActualTexto">Salón 1</strong></span>
+        <span>Salón: <strong id="salonActualTexto">Cargando...</strong></span>
         <span>Asistencia hoy: <strong id="contadorRegistrados">0 / 0</strong></span>
     </div>
 
     <div class="person-list" id="personList"></div>
 </div>
 
-<!-- MODAL 1: Registrar Asistencia Individual -->
-<div class="modal-backdrop" id="modalAsistencia" onclick="cerrarModalFondo(event, 'modalAsistencia')">
+<!-- MODAL 1: REGISTRO DE ASISTENCIA Y ELIMINAR ALUMNO -->
+<div class="modal-backdrop" id="modalAsistencia" onclick="cerrarSiClicFuera(event, 'modalAsistencia')">
     <div class="modal-sheet">
         <div class="modal-header">
             <div>
-                <span id="modalSalonTag">Salón 1</span>
-                <h2 id="modalNombrePersona">Nombre de Persona</h2>
+                <span id="modalAsistenciaSubtitulo">Salón • Encargado</span>
+                <h2 id="modalAsistenciaNombre">Nombre del Alumno</h2>
             </div>
             <button type="button" class="btn-close" onclick="cerrarModal('modalAsistencia')">✕</button>
         </div>
@@ -797,23 +827,19 @@
         <form id="formAsistencia" onsubmit="guardarAsistencia(event)">
             <div class="form-group">
                 <label class="section-label">Asistencia</label>
-                <div class="radio-group cols-3">
+                <div class="radio-group cols-2">
                     <div class="radio-option">
-                        <input type="radio" name="asistencia" id="a_presente" value="Presente" checked>
+                        <input type="radio" name="asistencia" id="a_presente" value="Presente" checked onchange="actualizarEstadoFormulario()">
                         <label for="a_presente">Presente</label>
                     </div>
                     <div class="radio-option">
-                        <input type="radio" name="asistencia" id="a_tardanza" value="Tardanza">
-                        <label for="a_tardanza">Tardanza</label>
-                    </div>
-                    <div class="radio-option">
-                        <input type="radio" name="asistencia" id="a_ausente" value="Ausente">
+                        <input type="radio" name="asistencia" id="a_ausente" value="Ausente" onchange="actualizarEstadoFormulario()">
                         <label for="a_ausente">Ausente</label>
                     </div>
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" id="grupoPuntualidad">
                 <label class="section-label">Puntualidad</label>
                 <div class="radio-group cols-2">
                     <div class="radio-option">
@@ -827,7 +853,7 @@
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" id="grupoBiblia">
                 <label class="section-label">¿Trajo su Biblia?</label>
                 <div class="radio-group cols-2">
                     <div class="radio-option">
@@ -856,17 +882,23 @@
                 <span class="spinner" id="spinnerEnvio"></span>
                 <span id="textoBtnGuardar">Confirmar Registro</span>
             </button>
+
+            <div class="delete-student-zone">
+                <button type="button" class="btn-delete-student" id="btnEliminarPersona" onclick="eliminarPersonaActual()">
+                    🗑️ Eliminar alumno de este salón
+                </button>
+            </div>
         </form>
     </div>
 </div>
 
-<!-- MODAL 2: Registrar Ofrenda General del Salón -->
-<div class="modal-backdrop" id="modalOfrendaSalon" onclick="cerrarModalFondo(event, 'modalOfrendaSalon')">
+<!-- MODAL 2: OFRENDA DEL SALÓN -->
+<div class="modal-backdrop" id="modalOfrendaSalon" onclick="cerrarSiClicFuera(event, 'modalOfrendaSalon')">
     <div class="modal-sheet">
         <div class="modal-header">
             <div>
-                <span id="ofrendaModalSubtitulo">Ofrenda General por Salón</span>
-                <h2 id="ofrendaModalTitulo">Salón 1</h2>
+                <span id="modalOfrendaSubtitulo">Salón</span>
+                <h2>Registrar Ofrenda del Salón</h2>
             </div>
             <button type="button" class="btn-close" onclick="cerrarModal('modalOfrendaSalon')">✕</button>
         </div>
@@ -890,12 +922,12 @@
     </div>
 </div>
 
-<!-- MODAL 3: Añadir Nueva Persona -->
-<div class="modal-backdrop" id="modalNuevaPersona" onclick="cerrarModalFondo(event, 'modalNuevaPersona')">
+<!-- MODAL 3: NUEVA PERSONA -->
+<div class="modal-backdrop" id="modalNuevaPersona" onclick="cerrarSiClicFuera(event, 'modalNuevaPersona')">
     <div class="modal-sheet">
         <div class="modal-header">
             <div>
-                <span>Directorio de Iglesia</span>
+                <span>Padrón de Alumnos</span>
                 <h2>Añadir Nueva Persona</h2>
             </div>
             <button type="button" class="btn-close" onclick="cerrarModal('modalNuevaPersona')">✕</button>
@@ -932,13 +964,13 @@
     </div>
 </div>
 
-<!-- MODAL 4: Gestionar Salones y Encargados -->
-<div class="modal-backdrop" id="modalSalones" onclick="cerrarModalFondo(event, 'modalSalones')">
+<!-- MODAL 4: GESTIONAR SALONES -->
+<div class="modal-backdrop" id="modalSalones" onclick="cerrarSiClicFuera(event, 'modalSalones')">
     <div class="modal-sheet">
         <div class="modal-header">
             <div>
                 <span>Configuración</span>
-                <h2>Salones y Encargados</h2>
+                <h2>Gestionar Salones</h2>
             </div>
             <button type="button" class="btn-close" onclick="cerrarModal('modalSalones')">✕</button>
         </div>
@@ -958,652 +990,598 @@
     </div>
 </div>
 
-<div id="toast" class="toast"></div>
+<div class="toast" id="toast"></div>
 
 <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzqSRlTuvhvJx6paYt2fLQ1jUBlbUFrqPUIla6qxEMIE5eK5NRICrZzFJ96-Gs23Nxe-w/exec';
+    // Conserva aquí exactamente tu mismo enlace actual de Google Apps Script:
+    const SCRIPT_URL = "TU_ENLACE_ACTUAL_DE_APPS_SCRIPT";
 
-    let listaSalones = JSON.parse(localStorage.getItem('iglesia_salones')) || [
-        { id: 'sal_1', nombre: 'Salón 1', encargado: 'Por asignar', ofrendaHoy: 0, fechaOfrenda: '' },
-        { id: 'sal_2', nombre: 'Salón 2', encargado: 'Por asignar', ofrendaHoy: 0, fechaOfrenda: '' },
-        { id: 'sal_3', nombre: 'Salón 3', encargado: 'Por asignar', ofrendaHoy: 0, fechaOfrenda: '' },
-        { id: 'sal_4', nombre: 'Salón 4', encargado: 'Por asignar', ofrendaHoy: 0, fechaOfrenda: '' },
-        { id: 'sal_5', nombre: 'Salón 5', encargado: 'Por asignar', ofrendaHoy: 0, fechaOfrenda: '' }
+    let salones = [
+        { nombre: "Párvulos", encargado: "Elsa", ofrenda: 0 },
+        { nombre: "Intermedio", encargado: "Sin asignar", ofrenda: 0 },
+        { nombre: "Ad. Hombres", encargado: "Sin asignar", ofrenda: 0 },
+        { nombre: "Ad. Mujeres", encargado: "Sin asignar", ofrenda: 0 },
+        { nombre: "Adultos", encargado: "Sin asignar", ofrenda: 0 }
     ];
+    let personas = [];
+    let salonActual = "";
+    let personaSeleccionada = null;
+    let fechaHoyISO = "";
 
-    listaSalones.forEach(s => {
-        if (typeof s.encargado === 'undefined') s.encargado = 'Por asignar';
-        if (typeof s.ofrendaHoy === 'undefined') s.ofrendaHoy = 0;
-        if (typeof s.fechaOfrenda === 'undefined') s.fechaOfrenda = '';
-    });
-
-    let directorioPersonas = JSON.parse(localStorage.getItem('iglesia_personas')) || [
-        { id: 1, nombre: 'Carlos Mendoza Ruiz', salonId: 'sal_1', registradoHoy: false, fechaUltimoRegistro: '', detalle: '', observaciones: '' },
-        { id: 2, nombre: 'Ana Sofía Torres', salonId: 'sal_1', registradoHoy: false, fechaUltimoRegistro: '', detalle: '', observaciones: '' },
-        { id: 3, nombre: 'Luis Alberto Quispe', salonId: 'sal_1', registradoHoy: false, fechaUltimoRegistro: '', detalle: '', observaciones: '' },
-        { id: 4, nombre: 'Valeria Gómez Díaz', salonId: 'sal_2', registradoHoy: false, fechaUltimoRegistro: '', detalle: '', observaciones: '' },
-        { id: 5, nombre: 'Jorge Luis Castillo', salonId: 'sal_2', registradoHoy: false, fechaUltimoRegistro: '', detalle: '', observaciones: '' },
-        { id: 6, nombre: 'Rosa Elena Paredes', salonId: 'sal_3', registradoHoy: false, fechaUltimoRegistro: '', detalle: '', observaciones: '' },
-        { id: 7, nombre: 'Mateo Sebastián Rojas', salonId: 'sal_4', registradoHoy: false, fechaUltimoRegistro: '', detalle: '', observaciones: '' },
-        { id: 8, nombre: 'Camila Andrea Vargas', salonId: 'sal_5', registradoHoy: false, fechaUltimoRegistro: '', detalle: '', observaciones: '' }
-    ];
-
-    directorioPersonas.forEach(p => {
-        if (typeof p.observaciones === 'undefined') p.observaciones = '';
-    });
-
-    let salonActivoId = listaSalones[0].id;
-    let personaActiva = null;
-
-    function obtenerFechaClaveHoy() {
-        const d = new Date();
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    }
-
-    function verificarReinicioDiario() {
-        const hoyClave = obtenerFechaClaveHoy();
-        let huboCambios = false;
-
-        directorioPersonas.forEach(p => {
-            if (p.registradoHoy && p.fechaUltimoRegistro !== hoyClave) {
-                p.registradoHoy = false;
-                p.detalle = '';
-                huboCambios = true;
-            }
-        });
-
-        listaSalones.forEach(s => {
-            if (s.ofrendaHoy > 0 && s.fechaOfrenda !== hoyClave) {
-                s.ofrendaHoy = 0;
-                huboCambios = true;
-            }
-        });
-
-        if (huboCambios) guardarEstadoLocal();
-    }
-
-    function guardarEstadoLocal() {
-        localStorage.setItem('iglesia_salones', JSON.stringify(listaSalones));
-        localStorage.setItem('iglesia_personas', JSON.stringify(directorioPersonas));
-    }
-
-    function obtenerSalonObj(salonId) {
-        return listaSalones.find(item => item.id === salonId) || listaSalones[0];
-    }
-
-    function obtenerNombreSalon(salonId) {
-        const s = obtenerSalonObj(salonId);
-        return s ? s.nombre : 'Sin salón';
-    }
-
-    // Sincronizar salones y nuevas personas desde Google Sheets al abrir la app
-    async function cargarDatosDesdeSheets() {
-        try {
-            const response = await fetch(SCRIPT_URL, { method: 'GET', redirect: 'follow' });
-            const data = await response.json();
-
-            if (data.status === 'ok') {
-                let actualizado = false;
-
-                if (Array.isArray(data.salones) && data.salones.length > 0) {
-                    const hoyClave = obtenerFechaClaveHoy();
-                    listaSalones = data.salones.map(remoto => {
-                        const local = listaSalones.find(l => l.id === remoto.id);
-                        return {
-                            id: remoto.id,
-                            nombre: remoto.nombre,
-                            encargado: remoto.encargado || 'Por asignar',
-                            ofrendaHoy: (local && local.fechaOfrenda === hoyClave) ? local.ofrendaHoy : 0,
-                            fechaOfrenda: (local && local.fechaOfrenda === hoyClave) ? local.fechaOfrenda : ''
-                        };
-                    });
-                    actualizado = true;
-                }
-
-                if (Array.isArray(data.personas) && data.personas.length > 0) {
-                    data.personas.forEach(remota => {
-                        const existe = directorioPersonas.some(p =>
-                            String(p.id) === String(remota.id) ||
-                            p.nombre.toLowerCase() === remota.nombre.toLowerCase()
-                        );
-                        if (!existe) {
-                            directorioPersonas.unshift({
-                                id: remota.id,
-                                nombre: remota.nombre,
-                                salonId: remota.salonId || 'sal_1',
-                                registradoHoy: false,
-                                fechaUltimoRegistro: '',
-                                detalle: '',
-                                observaciones: remota.observaciones || ''
-                            });
-                            actualizado = true;
-                        }
-                    });
-                }
-
-                if (actualizado) {
-                    guardarEstadoLocal();
-                    renderizarTabsSalones();
-                    renderizarLista();
-                }
-            }
-        } catch (err) {
-            console.log('Modo local activo:', err);
-        }
-    }
-
-    async function sincronizarSalonesConSheets() {
-        try {
-            const response = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                redirect: 'follow',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({
-                    tipo: 'sync_salones',
-                    salones: listaSalones
-                })
-            });
-            const result = await response.json();
-            if (result.status === 'success') {
-                mostrarToast(result.message, 'success');
-            }
-        } catch (error) {
-            console.error('Error sincronizando salones:', error);
-            mostrarToast('Cambios guardados localmente (sin conexión a Sheets)', 'error');
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        verificarReinicioDiario();
-
-        const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        const hoy = new Date().toLocaleDateString('es-PE', opcionesFecha);
-        document.getElementById('currentDateLabel').innerText = hoy.charAt(0).toUpperCase() + hoy.slice(1);
-
-        document.querySelectorAll('input[name="asistencia"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                if (e.target.value === 'Tardanza') {
-                    document.getElementById('p_tarde').checked = true;
-                } else if (e.target.value === 'Presente') {
-                    document.getElementById('p_atiempo').checked = true;
-                }
-            });
-        });
-
-        renderizarTabsSalones();
-        renderizarLista();
+    document.addEventListener("DOMContentLoaded", () => {
+        inicializarFecha();
         cargarDatosDesdeSheets();
     });
 
-    function renderizarTabsSalones() {
-        const contenedor = document.getElementById('salonesTabs');
-        contenedor.innerHTML = '';
+    function inicializarFecha() {
+        const hoy = new Date();
+        const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        let textoFecha = hoy.toLocaleDateString('es-PE', opciones);
+        textoFecha = textoFecha.charAt(0).toUpperCase() + textoFecha.slice(1);
+        document.getElementById("currentDateLabel").textContent = textoFecha;
 
-        if (!listaSalones.some(s => s.id === salonActivoId) && listaSalones.length > 0) {
-            salonActivoId = listaSalones[0].id;
+        const yyyy = hoy.getFullYear();
+        const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+        const dd = String(hoy.getDate()).padStart(2, '0');
+        fechaHoyISO = `${mm}/${dd}/${yyyy}`;
+    }
+
+    async function cargarDatosDesdeSheets() {
+        const listEl = document.getElementById("personList");
+        listEl.innerHTML = `<div class="empty-state">Cargando salones y alumnos desde Google Sheets...</div>`;
+
+        try {
+            const res = await fetch(`${SCRIPT_URL}?action=getData&fecha=${encodeURIComponent(fechaHoyISO)}`);
+            const data = await res.json();
+
+            if (data.salones && data.salones.length > 0) {
+                salones = data.salones;
+            }
+            if (Array.isArray(data.personas)) {
+                personas = data.personas;
+            }
+
+            if (!salonActual || !salones.some(s => s.nombre === salonActual)) {
+                salonActual = salones[0]?.nombre || "";
+            }
+
+            renderizarSalones();
+            renderizarPersonas();
+        } catch (err) {
+            console.error(err);
+            salonActual = salones[0]?.nombre || "";
+            renderizarSalones();
+            renderizarPersonas();
+            mostrarToast("Error de conexión con Google Sheets", "error");
         }
+    }
 
-        listaSalones.forEach(salon => {
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = `salon-tab ${salon.id === salonActivoId ? 'active' : ''}`;
-            btn.innerText = salon.nombre;
-            btn.onclick = () => seleccionarSalon(salon.id);
-            contenedor.appendChild(btn);
+    function renderizarSalones() {
+        const tabsContainer = document.getElementById("salonesTabs");
+        tabsContainer.innerHTML = "";
+
+        salones.forEach(s => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "salon-tab" + (s.nombre === salonActual ? " active" : "");
+            btn.textContent = s.nombre;
+            btn.onclick = () => {
+                salonActual = s.nombre;
+                renderizarSalones();
+                renderizarPersonas();
+            };
+            tabsContainer.appendChild(btn);
         });
 
-        const salonActual = obtenerSalonObj(salonActivoId);
-        document.getElementById('salonActualTexto').innerText = salonActual.nombre;
-        document.getElementById('encargadoSalonTexto').innerText = salonActual.encargado || 'Por asignar';
-        document.getElementById('ofrendaSalonTexto').innerText = `S/ ${(Number(salonActual.ofrendaHoy) || 0).toFixed(2)}`;
-        document.getElementById('searchInput').placeholder = `Buscar nombre en ${salonActual.nombre}...`;
+        const infoSalon = salones.find(s => s.nombre === salonActual) || { nombre: salonActual, encargado: "Sin asignar", ofrenda: 0 };
+        document.getElementById("salonActualTexto").textContent = infoSalon.nombre;
+        document.getElementById("encargadoSalonTexto").textContent = infoSalon.encargado || "Sin asignar";
+        document.getElementById("ofrendaSalonTexto").textContent = `S/ ${Number(infoSalon.ofrenda || 0).toFixed(2)}`;
     }
 
-    function seleccionarSalon(salonId) {
-        salonActivoId = salonId;
-        renderizarTabsSalones();
-        renderizarLista();
-    }
+    function renderizarPersonas() {
+        const listEl = document.getElementById("personList");
+        const filtro = document.getElementById("searchInput").value.trim().toLowerCase();
+        document.getElementById("clearSearchBtn").style.display = filtro ? "flex" : "none";
 
-    function filtrarPersonas() {
-        const texto = document.getElementById('searchInput').value;
-        document.getElementById('clearSearchBtn').style.display = texto.length > 0 ? 'flex' : 'none';
-        renderizarLista();
-    }
+        const delSalon = personas.filter(p => p.salon === salonActual);
+        const filtradas = delSalon.filter(p => p.nombre.toLowerCase().includes(filtro));
 
-    function limpiarBusqueda() {
-        const input = document.getElementById('searchInput');
-        input.value = '';
-        document.getElementById('clearSearchBtn').style.display = 'none';
-        input.focus();
-        renderizarLista();
-    }
-
-    function renderizarLista() {
-        const contenedor = document.getElementById('personList');
-        const filtro = document.getElementById('searchInput').value.toLowerCase().trim();
-        const nombreSalonActual = obtenerNombreSalon(salonActivoId);
-
-        const personasDelSalon = directorioPersonas.filter(p => p.salonId === salonActivoId);
-        const registradosCount = personasDelSalon.filter(p => p.registradoHoy).length;
-        document.getElementById('contadorRegistrados').innerText = `${registradosCount} / ${personasDelSalon.length}`;
-
-        const filtradas = personasDelSalon.filter(p => p.nombre.toLowerCase().includes(filtro));
-
-        contenedor.innerHTML = '';
+        const presentes = delSalon.filter(p => p.registrado && p.asistencia === "Presente").length;
+        document.getElementById("contadorRegistrados").textContent = `${presentes} / ${delSalon.length}`;
 
         if (filtradas.length === 0) {
-            const valorBuscado = document.getElementById('searchInput').value.trim();
-            const mensaje = filtro 
-                ? `No se encontró a <strong>"${valorBuscado}"</strong> en ${nombreSalonActual}.`
-                : `Aún no hay personas registradas en <strong>${nombreSalonActual}</strong>.`;
-
-            contenedor.innerHTML = `
+            listEl.innerHTML = `
                 <div class="empty-state">
-                    <p>${mensaje}</p>
-                    <button type="button" onclick="abrirModalConNombre()">+ Añadir persona a ${nombreSalonActual}</button>
+                    <p style="margin:0 0 0.5rem; font-weight:700;">No hay alumnos en este salón${filtro ? " con ese nombre" : ""}.</p>
+                    <button type="button" onclick="abrirModalNuevaPersona()">+ Añadir alumno a ${salonActual}</button>
                 </div>
             `;
             return;
         }
 
-        filtradas.forEach(persona => {
-            const card = document.createElement('div');
-            card.className = `person-card ${persona.registradoHoy ? 'registered' : ''}`;
-            card.onclick = () => abrirModalAsistencia(persona);
+        listEl.innerHTML = "";
+        filtradas.forEach(p => {
+            const card = document.createElement("div");
+            card.className = "person-card" + (p.registrado ? " registered" : "");
+            card.onclick = () => abrirModalAsistencia(p);
 
-            const obsHtml = persona.observaciones
-                ? `<span class="obs-pill">📝 ${persona.observaciones}</span>`
-                : '';
+            let detalle = "Toca para registrar asistencia";
+            if (p.registrado) {
+                detalle = p.asistencia === "Ausente"
+                    ? "Ausente"
+                    : `Presente • ${p.puntualidad || "A tiempo"} • Biblia: ${p.biblias || "Sí"}`;
+            }
+
+            const obsHtml = p.observaciones ? `<span class="obs-pill">📝 ${escapeHtml(p.observaciones)}</span>` : "";
+            const badgeHtml = p.registrado
+                ? `<span class="badge done">✓ Listo</span>`
+                : `<span class="badge pending">Pendiente</span>`;
 
             card.innerHTML = `
                 <div class="person-info">
-                    <h3>${persona.nombre}</h3>
-                    <p>${persona.registradoHoy ? persona.detalle : 'Toca para registrar asistencia'}</p>
+                    <h3>${escapeHtml(p.nombre)}</h3>
+                    <p>${detalle}</p>
                     ${obsHtml}
                 </div>
-                <span class="badge ${persona.registradoHoy ? 'done' : 'pending'}">
-                    ${persona.registradoHoy ? '✓ Listo' : 'Registrar'}
-                </span>
+                ${badgeHtml}
             `;
-            contenedor.appendChild(card);
+            listEl.appendChild(card);
         });
     }
 
-    // --- Edición rápida de Encargado y Modal de Ofrenda General por Salón ---
-    function editarEncargadoRapido() {
-        abrirModalSalones();
-        setTimeout(() => {
-            const inputEnc = document.getElementById(`edit_enc_${salonActivoId}`);
-            if (inputEnc) inputEnc.focus();
-        }, 120);
+    function filtrarPersonas() {
+        renderizarPersonas();
     }
 
-    function abrirModalOfrendaSalon() {
-        const salonActual = obtenerSalonObj(salonActivoId);
-        document.getElementById('ofrendaModalTitulo').innerText = salonActual.nombre;
-        document.getElementById('ofrendaEncargadoInput').value = (salonActual.encargado && salonActual.encargado !== 'Por asignar') ? salonActual.encargado : '';
-        document.getElementById('ofrendaMontoSalonInput').value = salonActual.ofrendaHoy > 0 ? salonActual.ofrendaHoy : '';
-        document.getElementById('modalOfrendaSalon').classList.add('open');
-        setTimeout(() => document.getElementById('ofrendaMontoSalonInput').focus(), 100);
+    function limpiarBusqueda() {
+        document.getElementById("searchInput").value = "";
+        renderizarPersonas();
     }
 
-    async function guardarOfrendaSalon(e) {
-        e.preventDefault();
-        const salonActual = obtenerSalonObj(salonActivoId);
-        const encargadoVal = document.getElementById('ofrendaEncargadoInput').value.trim() || 'Por asignar';
-        const montoVal = Number(document.getElementById('ofrendaMontoSalonInput').value) || 0;
-
-        const btn = document.getElementById('btnGuardarOfrendaSalon');
-        const spinner = document.getElementById('spinnerOfrenda');
-        const textoBtn = document.getElementById('textoBtnOfrenda');
-
-        const cambioEncargado = salonActual.encargado !== encargadoVal;
-        salonActual.encargado = encargadoVal;
-        salonActual.ofrendaHoy = montoVal;
-        salonActual.fechaOfrenda = obtenerFechaClaveHoy();
-        guardarEstadoLocal();
-        renderizarTabsSalones();
-
-        if (cambioEncargado) {
-            sincronizarSalonesConSheets();
-        }
-
-        const payload = {
-            tipo: 'ofrenda_salon',
-            salon: salonActual.nombre,
-            encargado: encargadoVal,
-            ofrenda: montoVal
-        };
-
-        btn.disabled = true;
-        spinner.style.display = 'inline-block';
-        textoBtn.innerText = 'Enviando...';
-
-        try {
-            const response = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                redirect: 'follow',
-                headers: {
-                    'Content-Type': 'text/plain;charset=utf-8',
-                },
-                body: JSON.stringify(payload)
-            });
-
-            const result = await response.json();
-            if (result.status === 'success') {
-                cerrarModal('modalOfrendaSalon');
-                mostrarToast(result.message, 'success');
-            } else {
-                throw new Error(result.message || 'Error al guardar ofrenda');
-            }
-        } catch (error) {
-            console.error('Error al enviar ofrenda:', error);
-            cerrarModal('modalOfrendaSalon');
-            mostrarToast(`Ofrenda S/ ${montoVal.toFixed(2)} guardada en el dispositivo`, 'error');
-        } finally {
-            btn.disabled = false;
-            spinner.style.display = 'none';
-            textoBtn.innerText = 'Guardar Ofrenda del Salón';
-        }
-    }
-
-    // --- Gestión de Salones y Encargados ---
-    function abrirModalSalones() {
-        renderizarListaGestionSalones();
-        document.getElementById('modalSalones').classList.add('open');
-    }
-
-    function renderizarListaGestionSalones() {
-        const contenedor = document.getElementById('salonManageList');
-        contenedor.innerHTML = '';
-
-        listaSalones.forEach(salon => {
-            const cantidadPersonas = directorioPersonas.filter(p => p.salonId === salon.id).length;
-            const card = document.createElement('div');
-            card.className = 'salon-manage-card';
-
-            card.innerHTML = `
-                <div class="salon-manage-row">
-                    <input type="text" id="edit_salon_${salon.id}" value="${salon.nombre}" placeholder="Nombre del salón">
-                    ${listaSalones.length > 1 ? `<button type="button" class="btn-icon-delete" title="Eliminar salón" onclick="eliminarSalon('${salon.id}', ${cantidadPersonas})">✕</button>` : ''}
-                </div>
-                <div class="salon-manage-row">
-                    <input type="text" id="edit_enc_${salon.id}" value="${salon.encargado || ''}" placeholder="Nombre del encargado...">
-                    <button type="button" class="btn-icon-save" onclick="guardarCambiosSalon('${salon.id}')">Guardar</button>
-                </div>
-            `;
-            contenedor.appendChild(card);
-        });
-    }
-
-    function guardarCambiosSalon(salonId) {
-        const inputNombre = document.getElementById(`edit_salon_${salonId}`);
-        const inputEncargado = document.getElementById(`edit_enc_${salonId}`);
-        const nuevoNombre = inputNombre.value.trim();
-        const nuevoEncargado = inputEncargado.value.trim() || 'Por asignar';
-
-        if (!nuevoNombre) {
-            mostrarToast('El nombre del salón no puede estar vacío', 'error');
-            return;
-        }
-
-        const salon = listaSalones.find(s => s.id === salonId);
-        if (salon) {
-            salon.nombre = nuevoNombre;
-            salon.encargado = nuevoEncargado;
-            guardarEstadoLocal();
-            renderizarTabsSalones();
-            renderizarLista();
-            sincronizarSalonesConSheets();
-        }
-    }
-
-    function crearNuevoSalon(e) {
-        e.preventDefault();
-        const inputNombre = document.getElementById('inputNuevoSalonNombre');
-        const inputEncargado = document.getElementById('inputNuevoSalonEncargado');
-        const nombre = inputNombre.value.trim();
-        const encargado = inputEncargado.value.trim() || 'Por asignar';
-        if (!nombre) return;
-
-        const nuevoId = 'sal_' + Date.now();
-        listaSalones.push({
-            id: nuevoId,
-            nombre: nombre,
-            encargado: encargado,
-            ofrendaHoy: 0,
-            fechaOfrenda: ''
-        });
-        guardarEstadoLocal();
-
-        inputNombre.value = '';
-        inputEncargado.value = '';
-        salonActivoId = nuevoId;
-        renderizarListaGestionSalones();
-        renderizarTabsSalones();
-        renderizarLista();
-        sincronizarSalonesConSheets();
-    }
-
-    function eliminarSalon(salonId, cantidadPersonas) {
-        if (cantidadPersonas > 0) {
-            mostrarToast(`No puedes eliminar un salón con ${cantidadPersonas} persona(s) inscrita(s)`, 'error');
-            return;
-        }
-
-        listaSalones = listaSalones.filter(s => s.id !== salonId);
-        guardarEstadoLocal();
-        renderizarListaGestionSalones();
-        renderizarTabsSalones();
-        renderizarLista();
-        sincronizarSalonesConSheets();
-    }
-
-    // --- Modal de Asistencia Individual y Observaciones ---
+    // --- MODAL ASISTENCIA ---
     function abrirModalAsistencia(persona) {
-        personaActiva = persona;
-        const salonObj = obtenerSalonObj(persona.salonId);
-        document.getElementById('modalSalonTag').innerText = `${salonObj.nombre} • Encargado: ${salonObj.encargado || 'Por asignar'}`;
-        document.getElementById('modalNombrePersona').innerText = persona.nombre;
-        document.getElementById('formAsistencia').reset();
-        document.getElementById('observacionesInput').value = persona.observaciones || '';
-        document.getElementById('modalAsistencia').classList.add('open');
+        personaSeleccionada = persona;
+        const infoSalon = salones.find(s => s.nombre === salonActual);
+        const encargado = infoSalon?.encargado || "Sin asignar";
+
+        document.getElementById("modalAsistenciaSubtitulo").textContent = `${salonActual} • Encargado: ${encargado}`;
+        document.getElementById("modalAsistenciaNombre").textContent = persona.nombre;
+
+        if (persona.registrado && persona.asistencia === "Ausente") {
+            document.getElementById("a_ausente").checked = true;
+        } else {
+            document.getElementById("a_presente").checked = true;
+        }
+
+        if (persona.puntualidad === "Tarde") {
+            document.getElementById("p_tarde").checked = true;
+        } else {
+            document.getElementById("p_atiempo").checked = true;
+        }
+
+        if (persona.biblias === "No") {
+            document.getElementById("b_no").checked = true;
+        } else {
+            document.getElementById("b_si").checked = true;
+        }
+
+        document.getElementById("observacionesInput").value = persona.observaciones || "";
+        actualizarEstadoFormulario();
+        abrirModal("modalAsistencia");
+    }
+
+    function actualizarEstadoFormulario() {
+        const esAusente = document.getElementById("a_ausente").checked;
+        const grupoPuntualidad = document.getElementById("grupoPuntualidad");
+        const grupoBiblia = document.getElementById("grupoBiblia");
+
+        grupoPuntualidad.style.opacity = esAusente ? "0.45" : "1";
+        grupoBiblia.style.opacity = esAusente ? "0.45" : "1";
+        grupoPuntualidad.style.pointerEvents = esAusente ? "none" : "auto";
+        grupoBiblia.style.pointerEvents = esAusente ? "none" : "auto";
+
+        if (esAusente) {
+            document.getElementById("b_no").checked = true;
+        }
     }
 
     function agregarEtiquetaObs(texto) {
-        const input = document.getElementById('observacionesInput');
+        const input = document.getElementById("observacionesInput");
         const actual = input.value.trim();
         if (!actual) {
             input.value = texto;
-        } else if (!actual.toLowerCase().includes(texto.toLowerCase())) {
+        } else if (!actual.includes(texto)) {
             input.value = `${actual}, ${texto}`;
         }
-        input.focus();
     }
 
-    function poblarSelectSalones() {
-        const select = document.getElementById('nuevoSalon');
-        select.innerHTML = '';
-        listaSalones.forEach(s => {
-            const opt = document.createElement('option');
-            opt.value = s.id;
-            opt.innerText = `${s.nombre} (${s.encargado || 'Sin encargado'})`;
-            select.appendChild(opt);
-        });
-        select.value = salonActivoId;
-    }
-
-    function abrirModalNuevaPersona() {
-        document.getElementById('formNuevaPersona').reset();
-        poblarSelectSalones();
-        document.getElementById('modalNuevaPersona').classList.add('open');
-        setTimeout(() => document.getElementById('nuevoNombre').focus(), 100);
-    }
-
-    function abrirModalConNombre() {
-        const nombreBuscado = document.getElementById('searchInput').value.trim();
-        abrirModalNuevaPersona();
-        document.getElementById('nuevoNombre').value = nombreBuscado;
-    }
-
-    function cerrarModal(id) {
-        document.getElementById(id).classList.remove('open');
-    }
-
-    function cerrarModalFondo(e, id) {
-        if (e.target.id === id) cerrarModal(id);
-    }
-
-    async function guardarAsistencia(e) {
-        e.preventDefault();
-        if (!personaActiva) return;
-
-        const btn = document.getElementById('btnGuardarAsistencia');
-        const textoBtn = document.getElementById('textoBtnGuardar');
-        const spinner = document.getElementById('spinnerEnvio');
+    async function guardarAsistencia(event) {
+        event.preventDefault();
+        if (!personaSeleccionada) return;
 
         const asistencia = document.querySelector('input[name="asistencia"]:checked').value;
-        const puntualidad = document.querySelector('input[name="puntualidad"]:checked').value;
-        const biblias = document.querySelector('input[name="biblias"]:checked').value;
-        const observaciones = document.getElementById('observacionesInput').value.trim();
-        const salonObj = obtenerSalonObj(personaActiva.salonId);
+        const puntualidad = asistencia === "Ausente"
+            ? "No"
+            : (document.querySelector('input[name="puntualidad"]:checked').value === "A tiempo" ? "Sí" : "Tarde");
+        const biblias = asistencia === "Ausente" ? "No" : document.querySelector('input[name="biblias"]:checked').value;
+        const observaciones = document.getElementById("observacionesInput").value.trim();
 
-        const payload = {
-            tipo: 'asistencia',
-            salon: salonObj.nombre,
-            encargado: salonObj.encargado || 'Por asignar',
-            nombres: personaActiva.nombre,
-            asistencia: asistencia,
-            puntualidad: puntualidad,
-            biblias: biblias,
-            observaciones: observaciones
-        };
+        const btn = document.getElementById("btnGuardarAsistencia");
+        const spinner = document.getElementById("spinnerEnvio");
+        const textoBtn = document.getElementById("textoBtnGuardar");
 
         btn.disabled = true;
-        spinner.style.display = 'inline-block';
-        textoBtn.innerText = 'Enviando...';
+        spinner.style.display = "inline-block";
+        textoBtn.textContent = "Guardando...";
 
         try {
-            const response = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                redirect: 'follow',
-                headers: {
-                    'Content-Type': 'text/plain;charset=utf-8',
-                },
-                body: JSON.stringify(payload)
-            });
+            const payload = {
+                action: "guardarAsistencia",
+                fecha: fechaHoyISO,
+                salon: salonActual,
+                nombre: personaSeleccionada.nombre,
+                asistencia: asistencia === "Presente" ? "Sí" : "No",
+                puntualidad: puntualidad,
+                biblias: biblias,
+                observaciones: observaciones
+            };
 
-            const result = await response.json();
+            const res = await enviarPostSheets(payload);
+            if (!res.success) throw new Error(res.error || "Error al guardar");
 
-            if (result.status === 'success') {
-                personaActiva.registradoHoy = true;
-                personaActiva.fechaUltimoRegistro = obtenerFechaClaveHoy();
-                personaActiva.observaciones = observaciones;
-                personaActiva.detalle = `${asistencia} • ${puntualidad} • Biblia: ${biblias}`;
-                guardarEstadoLocal();
+            personaSeleccionada.registrado = true;
+            personaSeleccionada.asistencia = asistencia;
+            personaSeleccionada.puntualidad = document.querySelector('input[name="puntualidad"]:checked').value;
+            personaSeleccionada.biblias = biblias;
+            personaSeleccionada.observaciones = observaciones;
 
-                cerrarModal('modalAsistencia');
-                renderizarLista();
-                mostrarToast(result.message || `✓ Asistencia de ${personaActiva.nombre} guardada`, 'success');
-            } else {
-                throw new Error(result.message || 'Error en respuesta del servidor');
-            }
-
-        } catch (error) {
-            console.error('Fallo de envío:', error);
-            personaActiva.registradoHoy = true;
-            personaActiva.fechaUltimoRegistro = obtenerFechaClaveHoy();
-            personaActiva.observaciones = observaciones;
-            personaActiva.detalle = `(Respaldo local) ${asistencia} • ${puntualidad} • Biblia: ${biblias}`;
-            guardarEstadoLocal();
-
-            cerrarModal('modalAsistencia');
-            renderizarLista();
-            mostrarToast('Guardado en respaldo local (sin conexión a Sheets)', 'error');
+            cerrarModal("modalAsistencia");
+            renderizarPersonas();
+            mostrarToast(`Asistencia de ${personaSeleccionada.nombre} guardada`, "success");
+        } catch (err) {
+            console.error(err);
+            mostrarToast("No se pudo guardar: " + err.message, "error");
         } finally {
             btn.disabled = false;
-            spinner.style.display = 'none';
-            textoBtn.innerText = 'Confirmar Registro';
+            spinner.style.display = "none";
+            textoBtn.textContent = "Confirmar Registro";
         }
     }
 
-    async function agregarNuevaPersona(e) {
-        e.preventDefault();
-        const nombre = document.getElementById('nuevoNombre').value.trim();
-        const salonId = document.getElementById('nuevoSalon').value;
-        const notaInicial = document.getElementById('nuevaNotaInicial').value.trim();
-        const abrirRegistro = document.getElementById('abrirRegistroAlCrear').checked;
+    // --- ELIMINAR ALUMNO DEL SALÓN ---
+    async function eliminarPersonaActual() {
+        if (!personaSeleccionada) return;
+
+        const nombreAlumno = personaSeleccionada.nombre;
+        const salonAlumno = salonActual;
+
+        const confirmar = confirm(
+            `¿Estás seguro de eliminar a "${nombreAlumno}" del salón "${salonAlumno}"?\n\nDejará de aparecer en la lista de asistencia.`
+        );
+        if (!confirmar) return;
+
+        const btnEliminar = document.getElementById("btnEliminarPersona");
+        const btnGuardar = document.getElementById("btnGuardarAsistencia");
+        btnEliminar.disabled = true;
+        btnGuardar.disabled = true;
+        btnEliminar.textContent = "Eliminando de Google Sheets...";
+
+        try {
+            const res = await enviarPostSheets({
+                action: "eliminarPersona",
+                nombre: nombreAlumno,
+                salon: salonAlumno
+            });
+
+            if (!res.success) {
+                throw new Error(res.error || "No se pudo eliminar en la hoja de cálculo");
+            }
+
+            personas = personas.filter(p => !(p.nombre === nombreAlumno && p.salon === salonAlumno));
+            cerrarModal("modalAsistencia");
+            renderizarPersonas();
+            mostrarToast(`${nombreAlumno} fue eliminado de ${salonAlumno}`, "success");
+        } catch (err) {
+            console.error(err);
+            mostrarToast("Error al eliminar: " + err.message, "error");
+        } finally {
+            btnEliminar.disabled = false;
+            btnGuardar.disabled = false;
+            btnEliminar.textContent = "🗑️ Eliminar alumno de este salón";
+        }
+    }
+
+    // --- MODAL OFRENDA ---
+    function abrirModalOfrendaSalon() {
+        const infoSalon = salones.find(s => s.nombre === salonActual) || { encargado: "", ofrenda: 0 };
+        document.getElementById("modalOfrendaSubtitulo").textContent = `Salón: ${salonActual}`;
+        document.getElementById("ofrendaEncargadoInput").value = infoSalon.encargado === "Sin asignar" ? "" : (infoSalon.encargado || "");
+        document.getElementById("ofrendaMontoSalonInput").value = infoSalon.ofrenda || "";
+        abrirModal("modalOfrendaSalon");
+    }
+
+    async function guardarOfrendaSalon(event) {
+        event.preventDefault();
+        const encargado = document.getElementById("ofrendaEncargadoInput").value.trim();
+        const monto = parseFloat(document.getElementById("ofrendaMontoSalonInput").value) || 0;
+
+        const btn = document.getElementById("btnGuardarOfrendaSalon");
+        const spinner = document.getElementById("spinnerOfrenda");
+        const textoBtn = document.getElementById("textoBtnOfrenda");
+
+        btn.disabled = true;
+        spinner.style.display = "inline-block";
+        textoBtn.textContent = "Guardando...";
+
+        try {
+            const res = await enviarPostSheets({
+                action: "guardarOfrendaSalon",
+                fecha: fechaHoyISO,
+                salon: salonActual,
+                encargado: encargado,
+                ofrenda: monto
+            });
+            if (!res.success) throw new Error(res.error || "Error al guardar ofrenda");
+
+            const infoSalon = salones.find(s => s.nombre === salonActual);
+            if (infoSalon) {
+                infoSalon.encargado = encargado;
+                infoSalon.ofrenda = monto;
+            }
+
+            renderizarSalones();
+            cerrarModal("modalOfrendaSalon");
+            mostrarToast(`Ofrenda de S/ ${monto.toFixed(2)} guardada`, "success");
+        } catch (err) {
+            mostrarToast("Error: " + err.message, "error");
+        } finally {
+            btn.disabled = false;
+            spinner.style.display = "none";
+            textoBtn.textContent = "Guardar Ofrenda del Salón";
+        }
+    }
+
+    // --- MODAL NUEVA PERSONA ---
+    function abrirModalNuevaPersona() {
+        const select = document.getElementById("nuevoSalon");
+        select.innerHTML = "";
+        salones.forEach(s => {
+            const opt = document.createElement("option");
+            opt.value = s.nombre;
+            opt.textContent = s.nombre;
+            if (s.nombre === salonActual) opt.selected = true;
+            select.appendChild(opt);
+        });
+
+        document.getElementById("nuevoNombre").value = "";
+        document.getElementById("nuevaNotaInicial").value = "";
+        abrirModal("modalNuevaPersona");
+    }
+
+    async function agregarNuevaPersona(event) {
+        event.preventDefault();
+        const nombre = document.getElementById("nuevoNombre").value.trim();
+        const salon = document.getElementById("nuevoSalon").value;
+        const nota = document.getElementById("nuevaNotaInicial").value.trim();
+        const abrirDespues = document.getElementById("abrirRegistroAlCrear").checked;
 
         if (!nombre) return;
 
-        const btn = document.getElementById('btnGuardarNuevaPersona');
-        const spinner = document.getElementById('spinnerNuevaPersona');
-        const textoBtn = document.getElementById('textoBtnNuevaPersona');
-
-        const nuevaPersona = {
-            id: Date.now(),
-            nombre: nombre,
-            salonId: salonId,
-            registradoHoy: false,
-            fechaUltimoRegistro: '',
-            detalle: '',
-            observaciones: notaInicial
-        };
-
-        directorioPersonas.unshift(nuevaPersona);
-        guardarEstadoLocal();
+        const btn = document.getElementById("btnGuardarNuevaPersona");
+        const spinner = document.getElementById("spinnerNuevaPersona");
+        const textoBtn = document.getElementById("textoBtnNuevaPersona");
 
         btn.disabled = true;
-        spinner.style.display = 'inline-block';
-        textoBtn.innerText = 'Guardando...';
+        spinner.style.display = "inline-block";
+        textoBtn.textContent = "Guardando...";
 
         try {
-            const response = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                redirect: 'follow',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({
-                    tipo: 'nueva_persona',
-                    id: nuevaPersona.id,
-                    nombre: nombre,
-                    salonId: salonId,
-                    salonNombre: obtenerNombreSalon(salonId),
-                    observaciones: notaInicial
-                })
+            const res = await enviarPostSheets({
+                action: "agregarPersona",
+                nombre: nombre,
+                salon: salon,
+                observaciones: nota
             });
-            const result = await response.json();
-            mostrarToast(result.message || `+ ${nombre} guardado en Sheets`, 'success');
+            if (!res.success) throw new Error(res.error || "No se pudo agregar");
+
+            const nuevaPersona = {
+                nombre: nombre,
+                salon: salon,
+                registrado: false,
+                asistencia: "Presente",
+                puntualidad: "A tiempo",
+                biblias: "Sí",
+                observaciones: nota
+            };
+            personas.push(nuevaPersona);
+
+            salonActual = salon;
+            renderizarSalones();
+            renderizarPersonas();
+            cerrarModal("modalNuevaPersona");
+            mostrarToast(`${nombre} añadido a ${salon}`, "success");
+
+            if (abrirDespues) {
+                abrirModalAsistencia(nuevaPersona);
+            }
         } catch (err) {
-            console.error('Error guardando nueva persona en Sheets:', err);
-            mostrarToast(`+ ${nombre} añadido localmente`, 'success');
+            mostrarToast("Error: " + err.message, "error");
         } finally {
             btn.disabled = false;
-            spinner.style.display = 'none';
-            textoBtn.innerText = 'Guardar en Lista y Sheets';
-        }
-
-        cerrarModal('modalNuevaPersona');
-        limpiarBusqueda();
-
-        if (salonId !== salonActivoId) {
-            seleccionarSalon(salonId);
-        } else {
-            renderizarLista();
-        }
-
-        if (abrirRegistro) {
-            setTimeout(() => abrirModalAsistencia(nuevaPersona), 350);
+            spinner.style.display = "none";
+            textoBtn.textContent = "Guardar en Lista y Sheets";
         }
     }
 
-    function mostrarToast(mensaje, tipo = 'success') {
-        const toast = document.getElementById('toast');
-        toast.innerText = mensaje;
+    // --- GESTIÓN DE SALONES ---
+    function abrirModalSalones() {
+        renderizarListaGestionSalones();
+        abrirModal("modalSalones");
+    }
+
+    function renderizarListaGestionSalones() {
+        const cont = document.getElementById("salonManageList");
+        cont.innerHTML = "";
+
+        salones.forEach((s, idx) => {
+            const card = document.createElement("div");
+            card.className = "salon-manage-card";
+            card.innerHTML = `
+                <div class="salon-manage-row">
+                    <input type="text" id="editSalonNombre_${idx}" value="${escapeHtml(s.nombre)}" placeholder="Nombre del salón">
+                    <button type="button" class="btn-icon-delete" title="Eliminar salón" onclick="eliminarSalon(${idx})">🗑️</button>
+                </div>
+                <div class="salon-manage-row">
+                    <input type="text" id="editSalonEncargado_${idx}" value="${escapeHtml(s.encargado || '')}" placeholder="Encargado del salón">
+                    <button type="button" class="btn-icon-save" onclick="guardarCambiosSalon(${idx})">Guardar</button>
+                </div>
+            `;
+            cont.appendChild(card);
+        });
+    }
+
+    async function editarEncargadoRapido() {
+        const infoSalon = salones.find(s => s.nombre === salonActual);
+        if (!infoSalon) return;
+        const nuevo = prompt(`Nuevo encargado para el salón "${salonActual}":`, infoSalon.encargado || "");
+        if (nuevo === null) return;
+
+        try {
+            const res = await enviarPostSheets({
+                action: "guardarSalon",
+                salonAnterior: salonActual,
+                nombre: salonActual,
+                encargado: nuevo.trim() || "Sin asignar"
+            });
+            if (!res.success) throw new Error(res.error);
+
+            infoSalon.encargado = nuevo.trim() || "Sin asignar";
+            renderizarSalones();
+            mostrarToast("Encargado actualizado", "success");
+        } catch (err) {
+            mostrarToast("Error al actualizar encargado", "error");
+        }
+    }
+
+    async function guardarCambiosSalon(idx) {
+        const salonObj = salones[idx];
+        const nuevoNombre = document.getElementById(`editSalonNombre_${idx}`).value.trim();
+        const nuevoEncargado = document.getElementById(`editSalonEncargado_${idx}`).value.trim() || "Sin asignar";
+        if (!nuevoNombre) return;
+
+        try {
+            const res = await enviarPostSheets({
+                action: "guardarSalon",
+                salonAnterior: salonObj.nombre,
+                nombre: nuevoNombre,
+                encargado: nuevoEncargado
+            });
+            if (!res.success) throw new Error(res.error);
+
+            personas.forEach(p => {
+                if (p.salon === salonObj.nombre) p.salon = nuevoNombre;
+            });
+            if (salonActual === salonObj.nombre) salonActual = nuevoNombre;
+
+            salonObj.nombre = nuevoNombre;
+            salonObj.encargado = nuevoEncargado;
+
+            renderizarSalones();
+            renderizarPersonas();
+            mostrarToast("Salón actualizado", "success");
+        } catch (err) {
+            mostrarToast("Error al guardar salón", "error");
+        }
+    }
+
+    async function crearNuevoSalon(event) {
+        event.preventDefault();
+        const nombre = document.getElementById("inputNuevoSalonNombre").value.trim();
+        const encargado = document.getElementById("inputNuevoSalonEncargado").value.trim() || "Sin asignar";
+        if (!nombre) return;
+
+        try {
+            const res = await enviarPostSheets({
+                action: "crearSalon",
+                nombre: nombre,
+                encargado: encargado
+            });
+            if (!res.success) throw new Error(res.error);
+
+            salones.push({ nombre, encargado, ofrenda: 0 });
+            document.getElementById("inputNuevoSalonNombre").value = "";
+            document.getElementById("inputNuevoSalonEncargado").value = "";
+
+            renderizarListaGestionSalones();
+            renderizarSalones();
+            mostrarToast(`Salón "${nombre}" creado`, "success");
+        } catch (err) {
+            mostrarToast("Error al crear salón", "error");
+        }
+    }
+
+    async function eliminarSalon(idx) {
+        const salonObj = salones[idx];
+        if (!confirm(`¿Eliminar el salón "${salonObj.nombre}"?`)) return;
+
+        try {
+            const res = await enviarPostSheets({
+                action: "eliminarSalon",
+                nombre: salonObj.nombre
+            });
+            if (!res.success) throw new Error(res.error);
+
+            salones.splice(idx, 1);
+            if (salonActual === salonObj.nombre) {
+                salonActual = salones[0]?.nombre || "";
+            }
+            renderizarListaGestionSalones();
+            renderizarSalones();
+            renderizarPersonas();
+            mostrarToast("Salón eliminado", "success");
+        } catch (err) {
+            mostrarToast("Error al eliminar salón", "error");
+        }
+    }
+
+    // --- UTILIDADES ---
+    async function enviarPostSheets(payload) {
+        const response = await fetch(SCRIPT_URL, {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+        return await response.json();
+    }
+
+    function abrirModal(id) {
+        document.getElementById(id).classList.add("open");
+    }
+
+    function cerrarModal(id) {
+        document.getElementById(id).classList.remove("open");
+    }
+
+    function cerrarSiClicFuera(event, id) {
+        if (event.target.id === id) cerrarModal(id);
+    }
+
+    function mostrarToast(mensaje, tipo = "") {
+        const toast = document.getElementById("toast");
+        toast.textContent = mensaje;
         toast.className = `toast show ${tipo}`;
-        setTimeout(() => {
-            toast.classList.remove('show');
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(() => {
+            toast.className = "toast";
         }, 3200);
+    }
+
+    function escapeHtml(str) {
+        return String(str || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
     }
 </script>
 
